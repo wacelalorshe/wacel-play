@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - WacelMarkt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/admin.css">
+    <!-- إضافة Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">لوحة التحكم</h1>
+            <div class="nav-links">
+                <a href="index.html">العودة للمتجر</a>
+                <button id="adminLogoutBtn" class="btn-logout">تسجيل الخروج</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <div class="admin-container">
+            <h2>إدارة التطبيقات</h2>
+            
+            <!-- شريط البحث في لوحة التحكم -->
+            <div class="admin-search-section">
+                <div class="search-bar-admin">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="adminSearchInput" placeholder="ابحث عن التطبيقات بالاسم أو التصنيف...">
+                    <button class="search-btn" onclick="searchAdminApps()">بحث</button>
+                </div>
+                <button class="clear-search-btn" onclick="clearAdminSearch()" style="display: none;">
+                    <i class="fas fa-times"></i>
+                    إعادة الضبط
+                </button>
+            </div>
+
+            <!-- إحصائيات سريعة -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>إجمالي التطبيقات</h3>
+                    <p id="totalApps">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>التطبيقات النشطة</h3>
+                    <p id="activeApps">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>نتائج البحث</h3>
+                    <p id="searchResultsCount">-</p>
+                </div>
+            </div>
+
+            <!-- نموذج إضافة تطبيق -->
+            <section class="add-app-section">
+                <h3>إضافة تطبيق جديد</h3>
+                <form id="addAppForm" class="app-form">
+                    <div class="form-group">
+                        <label for="appName">اسم التطبيق *</label>
+                        <input type="text" id="appName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appDescription">وصف التطبيق *</label>
+                        <textarea id="appDescription" rows="4" placeholder="يمكنك كتابة وصف طويل ومفصل للتطبيق..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appVersion">الإصدار *</label>
+                            <input type="text" id="appVersion" placeholder="مثال: 1.0.0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="appSize">الحجم (MB) *</label>
+                            <input type="number" id="appSize" placeholder="مثال: 25" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appCategory">التصنيف *</label>
+                            <select id="appCategory" required>
+                                <option value="">اختر التصنيف</option>
+                                <option value="productivity">فتوغرافي</option>
+                                <option value="education">الذكاء الاصطناعي</option>
+                                <option value="entertainment">الترفيه</option>
+                                <option value="utility">الأدوات</option>
+                                <option value="games">الألعاب</option>
+                                <option value="social">التواصل الاجتماعي</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="appRating">التقييم (1-5)</label>
+                            <input type="number" id="appRating" min="1" max="5" step="0.1" placeholder="4.5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appDownloadURL">رابط التحميل *</label>
+                        <input type="url" id="appDownloadURL" placeholder="https://example.com/app.zip" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appIconURL">رابط الأيقونة (اختياري)</label>
+                        <input type="url" id="appIconURL" placeholder="https://example.com/icon.png">
+                        <small>يجب أن تكون الصورة مربعة ومقاس مناسب للعرض</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="appFeatured"> تطبيق مميز
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="appTrending"> تطبيق شائع
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">إضافة التطبيق</button>
+                    <div id="formMessage"></div>
+                </form>
+            </section>
+
+            <!-- قائمة التطبيقات -->
+            <section class="apps-management">
+                <div class="section-header">
+                    <h3>التطبيقات المضافة</h3>
+                    <span id="appsCount" class="apps-count">(0 تطبيق)</span>
+                </div>
+                <div id="adminAppsList" class="admin-apps-grid">
+                    <p>جاري تحميل التطبيقات...</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- نافذة التحميل -->
+    <div id="loadingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>جاري معالجة الطلب...</h3>
+            <p>يرجى الانتظار</p>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل التطبيق -->
+    <div id="editAppModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>تعديل التطبيق</h3>
+            <form id="editAppForm" class="app-form">
+                <input type="hidden" id="editAppId">
+                
+                <div class="form-group">
+                    <label for="editAppName">اسم التطبيق *</label>
+                    <input type="text" id="editAppName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAppDescription">وصف التطبيق *</label>
+                    <textarea id="editAppDescription" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAppVersion">الإصدار *</label>
+                        <input type="text" id="editAppVersion" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editAppSize">الحجم (MB) *</label>
+                        <input type="number" id="editAppSize" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAppCategory">التصنيف *</label>
+                        <select id="editAppCategory" required>
+                            <option value="">اختر التصنيف</option>
+                            <option value="productivity">فتوغرافي</option>
+                            <option value="education">الذكاء الاصطناعي</option>
+                            <option value="entertainment">الترفيه</option>
+                            <option value="utility">الأدوات</option>
+                            <option value="games">الألعاب</option>
+                            <option value="social">التواصل الاجتماعي</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editAppRating">التقييم (1-5)</label>
+                        <input type="number" id="editAppRating" min="1" max="5" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAppDownloadURL">رابط التحميل *</label>
+                    <input type="url" id="editAppDownloadURL" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAppIconURL">رابط الأيقونة (اختياري)</label>
+                    <input type="url" id="editAppIconURL">
+                    <small>سيتم ضبط حجم الصورة تلقائياً للعرض المناسب</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="editAppFeatured"> تطبيق مميز
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="editAppTrending"> تطبيق شائع
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">حفظ التعديلات</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- تحميل ملفات JavaScript -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
