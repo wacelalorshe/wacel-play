@@ -284,8 +284,7 @@ function createAppCard(app) {
                     تحميل
                 </button>
                 <button class="share-btn" onclick="shareApp('${app.id}', '${app.name}')">
-                    <i class="fas fa-share-alt"></i>
-                </button>
+                    <i class="fas fa-share-alt"></i>                     مشاركة                 </button>
                 ${isAdmin() ? `
                     <button class="delete-btn" onclick="deleteApp('${app.id}')">
                         <i class="fas fa-trash"></i>
