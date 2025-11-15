@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحميل التطبيق - وسيل بلاي</title>
+    <meta name="description" content="حمّل التطبيق مجاناً من وسيل بلاي - متجر التطبيقات العربي">
+    <meta name="robots" content="index, follow">
+    
+    <!-- سيتم تحديث هذه البيانات ديناميكياً -->
+    <meta property="og:title" content="وسيل بلاي - متجر التطبيقات العربي">
+    <meta property="og:description" content="حمّل أفضل التطبيقات والألعاب مجاناً">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wacel-play.netlify.app">
+    <meta property="og:image" content="https://wacel-play.netlify.app/images/logo.png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/style.css">
+    
+    <script>
+        // دالة لتحديث بيانات التعريف ديناميكياً
+        function updateMetaTags(app) {
+            if (!app) return;
+            
+            // تحديث العنوان
+            document.title = `${app.name} - تحميل مجاني | وسيل بلاي`;
+            
+            // تحديث وصف الصفحة
+            let metaDescription = document.querySelector('meta[name="description"]');
+            if (!metaDescription) {
+                metaDescription = document.createElement('meta');
+                metaDescription.name = 'description';
+                document.head.appendChild(metaDescription);
+            }
+            metaDescription.content = `${app.description} - حمّل ${app.name} مجاناً من وسيل بلاي. ${app.size}MB | الإصدار ${app.version}`;
+            
+            // تحديث Open Graph
+            updateMetaProperty('og:title', `${app.name} - وسيل بلاي`);
+            updateMetaProperty('og:description', app.description);
+            updateMetaProperty('og:url', window.location.href);
+            
+            if (app.iconURL) {
+                updateMetaProperty('og:image', app.iconURL);
+            }
+            
+            // إضافة Structured Data للتطبيق
+            addAppStructuredData(app);
+        }
+        
+        function updateMetaProperty(property, content) {
+            let meta = document.querySelector(`meta[property="${property}"]`);
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.setAttribute('property', property);
+                document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
+        }
+        
+        function addAppStructuredData(app) {
+            // إزالة أي Structured Data موجود مسبقاً
+            const existingSchema = document.querySelector('script[type="application/ld+json"]');
+            if (existingSchema) {
+                existingSchema.remove();
+            }
+            
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "SoftwareApplication",
+                "name": app.name,
+                "description": app.description,
+                "applicationCategory": getSchemaCategory(app.category),
+                "operatingSystem": "ANDROID",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                },
+                "author": {
+                    "@type": "Organization",
+                    "name": "وسيل بلاي"
+                },
+                "downloadUrl": app.downloadURL
+            };
+            
+            if (app.rating) {
+                schema.aggregateRating = {
+                    "@type": "AggregateRating",
+                    "ratingValue": app.rating.toString(),
+                    "ratingCount": "100"
+                };
+            }
+            
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.textContent = JSON.stringify(schema);
+            document.head.appendChild(script);
+        }
+        
+        function getSchemaCategory(category) {
+            const categories = {
+                'games': 'GameApplication',
+                'social': 'SocialNetworkingApplication',
+                'entertainment': 'EntertainmentApplication',
+                'productivity': 'BusinessApplication',
+                'education': 'EducationalApplication',
+                'utility': 'UtilityApplication'
+            };
+            return categories[category] || 'MobileApplication';
+        }
+    </script>
+    
+    <style>
+        /* الأنماط الحالية لـ share.html تبقى كما هي */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #edf2ff;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-light: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fb 0%, #e4e8f5 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .top-navbar {
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .main-content {
+            padding-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .share-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 1rem;
+        }
+        
+        .share-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .app-share-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+        
+        .share-app-icon {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 2.5rem;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .share-app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: inherit;
+        }
+        
+        .app-info {
+            flex: 1;
+        }
+        
+        .app-info h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.5rem;
+            color: var(--text-light);
+        }
+        
+        .app-category {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+            color: var(--text-light);
+        }
+        
+        .app-description {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.5;
+            color: var(--text-light);
+        }
+        
+        .app-details {
+            padding: 1.5rem 2rem;
+            background: var(--bg-card);
+        }
+        
+        .app-details h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .share-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .share-actions {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn-share-social {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        
+        .btn-twitter {
+            background: #1DA1F2;
+            color: white;
+        }
+        
+        .btn-facebook {
+            background: #1877F2;
+            color: white;
+        }
+        
+        .btn-copy-link {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-back {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-download {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 1rem;
+        }
+        
+        .btn-share-social:hover,
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            filter: brightness(1.1);
+        }
+        
+        .btn-back:hover {
+            background: #e9ecef;
+        }
+        
+        .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+        }
+        
+        .error-state i {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #ef4444;
+        }
+        
+        .error-state h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .download-info {
+            background: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            text-align: right;
+            border-right: 4px solid var(--primary);
+            color: var(--text-primary);
+        }
+        
+        .download-info h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+        }
+        
+        .loading-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .app-features {
+            margin: 1.5rem 0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+        }
+        
+        .feature-list i {
+            color: var(--primary);
+            width: 20px;
+        }
+        
+        .app-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .meta-item i {
+            color: var(--primary);
+        }
+        
+        /* أنماط الرسائل المؤقتة */
+        .temp-message {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .temp-message.success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .temp-message.error {
+            background: #ef4444;
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .app-share-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+            
+            .share-actions {
+                flex-direction: column;
+            }
+            
+            .btn-share-social, .btn-download {
+                width: 100%;
+            }
+            
+            .share-stats {
+                padding: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .app-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الشريط العلوي -->
+    <nav class="top-navbar">
+        <div class="nav-container">
+            <div class="logo-section">
+                <a href="index.html" style="text-decoration: none;">
+                    <h1 class="logo"><i class="fab fa-google-play"></i> وسيــل بـلاي</h1>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <div class="share-container">
+            <div class="share-card">
+                <div id="shareContent">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>جاري تحميل معلومات التطبيق...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        // استيراد دوال Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            updateDoc 
+        } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6h-oOG7xteSiJt2jDpSyGitiPp0aDimI",
+            authDomain: "wacelmarkt.firebaseapp.com",
+            projectId: "wacelmarkt",
+            storageBucket: "wacelmarkt.firebasestorage.app",
+            messagingSenderId: "662446208797",
+            appId: "1:662446208797:web:a3cc83551d42761e4753f4"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // الحصول على معرّف التطبيق من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const appId = urlParams.get('app');
+        let currentApp = null;
+
+        // تحميل التطبيق من Firebase
+        async function loadSharedApp() {
+            try {
+                if (!appId) {
+                    throw new Error('لم يتم تحديد تطبيق للمشاركة');
+                }
+                
+                console.log("جاري تحميل التطبيق:", appId);
+                
+                // محاولة الحصول على التطبيق من Firebase
+                const appDoc = await getDoc(doc(db, "apps", appId));
+                
+                if (appDoc.exists()) {
+                    currentApp = {
+                        id: appDoc.id,
+                        ...appDoc.data()
+                    };
+                    console.log("تم تحميل التطبيق:", currentApp);
+                    
+                    // تحديث بيانات التعريف
+                    updateMetaTags(currentApp);
+                    displayShareContent(currentApp);
+                } else {
+                    throw new Error('التطبيق غير موجود في قاعدة البيانات');
+                }
+
+            } catch (error) {
+                console.error('Error loading shared app:', error);
+                showErrorState('عذراً، لم يتم العثور على التطبيق المطلوب.');
+            }
+        }
+
+        // عرض محتوى المشاركة
+        function displayShareContent(app) {
+            const shareUrl = window.location.href;
+            const shareText = `اكتشف هذا التطبيق الرائع: ${app.name} - ${app.description}`;
+            
+            const appIcon = app.iconURL 
+                ? `<img src="${app.iconURL}" alt="${app.name}" loading="lazy">`
+                : `<i class="${getAppIcon(app.category)}"></i>`;
+            
+            // التحقق من وجود رابط تحميل
+            const hasDownloadLink = app.downloadURL && app.downloadURL.startsWith('http');
+            const downloadSection = hasDownloadLink ? `
+                <div class="share-actions">
+                    <button class="btn-back" onclick="goToHome()">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة إلى المتجر
+                    </button>
+                    <button class="btn-download" onclick="startDownload()">
+                        <i class="fas fa-download"></i>
+                        تحميل التطبيق
+                    </button>
+                </div>
+            ` : `
+                <div class="download-info">
+                    <h4><i class="fas fa-info-circle"></i> معلومات التحميل</h4>
+                    <p>رابط التحميل غير متوفر حالياً. يرجى زيارة المتجر الرئيسي.</p>
+                </div>
+                <div class="share-actions">
+                    <button class="btn-back" onclick="goToHome()" style="width: 100%;">
+                        <i class="fas fa-arrow-right"></i>
+                        العودة إلى المتجر
+                    </button>
+                </div>
+            `;
+            
+            // إنشاء قائمة الميزات إذا كانت متوفرة
+            const featuresHtml = app.features && app.features.length > 0 ? `
+                <div class="app-features">
+                    <h3>مميزات التطبيق</h3>
+                    <ul class="feature-list">
+                        ${app.features.map(feature => `<li><i class="fas fa-check-circle"></i> ${feature}</li>`).join('')}
+                    </ul>
+                </div>
+            ` : '';
+            
+            // إنشاء معلومات إضافية عن التطبيق
+            const metaInfoHtml = `
+                <div class="app-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${formatDate(app.createdAt)}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-sync"></i>
+                        <span>الإصدار ${app.version || '1.0.0'}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-hdd"></i>
+                        <span>${app.size || 'غير محدد'} MB</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('shareContent').innerHTML = `
+                <div class="app-share-header">
+                    <div class="share-app-icon">
+                        ${appIcon}
+                    </div>
+                    <div class="app-info">
+                        <h2>${app.name}</h2>
+                        <div class="app-category">${getCategoryName(app.category)}</div>
+                        <p class="app-description">${app.description}</p>
+                    </div>
+                </div>
+                
+                <div class="app-details">
+                    <div class="share-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">${app.downloads || 0}</div>
+                            <div class="stat-label">تنزيل</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${app.shareCount || 0}</div>
+                            <div class="stat-label">مشاركة</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${app.rating || '--'}</div>
+                            <div class="stat-label">تقييم</div>
+                        </div>
+                    </div>
+                    
+                    ${featuresHtml}
+                    
+                    <div class="share-actions">
+                        <button class="btn-share-social btn-whatsapp" onclick="shareOnWhatsApp('${shareText}', '${shareUrl}')">
+                            <i class="fab fa-whatsapp"></i>
+                            واتساب
+                        </button>
+                        <button class="btn-share-social btn-twitter" onclick="shareOnTwitter('${shareText}', '${shareUrl}')">
+                            <i class="fab fa-twitter"></i>
+                            تويتر
+                        </button>
+                        <button class="btn-share-social btn-facebook" onclick="shareOnFacebook('${shareUrl}')">
+                            <i class="fab fa-facebook"></i>
+                            فيسبوك
+                        </button>
+                    </div>
+                    
+                    <div class="share-actions">
+                        <button class="btn-copy-link" onclick="copyShareLink('${shareUrl}')">
+                            <i class="fas fa-link"></i>
+                            نسخ رابط المشاركة
+                        </button>
+                    </div>
+                    
+                    ${downloadSection}
+                    ${metaInfoHtml}
+                </div>
+            `;
+        }
+
+        // عرض حالة الخطأ
+        function showErrorState(message) {
+            document.getElementById('shareContent').innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>لم يتم العثور على التطبيق</h3>
+                    <p>${message}</p>
+                    <div class="share-actions" style="margin-top: 2rem;">
+                        <button class="btn-back" onclick="goToHome()">
+                            <i class="fas fa-arrow-right"></i>
+                            العودة إلى المتجر
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // الحصول على أيقونة التطبيق حسب التصنيف
+        function getAppIcon(category) {
+            const icons = {
+                'games': 'fas fa-gamepad',
+                'social': 'fas fa-comments',
+                'entertainment': 'fas fa-film',
+                'productivity': 'fas fa-briefcase',
+                'education': 'fas fa-graduation-cap',
+                'utility': 'fas fa-tools'
+            };
+            return icons[category] || 'fas fa-mobile-alt';
+        }
+
+        // الحصول على اسم التصنيف
+        function getCategoryName(category) {
+            const categories = {
+                'games': 'الألعاب',
+                'social': 'التواصل الاجتماعي',
+                'entertainment': 'الترفيه',
+                'productivity': 'الإنتاجية',
+                'education': 'التعليم',
+                'utility': 'الأدوات'
+            };
+            return categories[category] || category;
+        }
+
+        // تنسيق التاريخ
+        function formatDate(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            
+            try {
+                const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                return date.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return 'غير محدد';
+            }
+        }
+
+        // مشاركة على واتساب
+        function shareOnWhatsApp(text, url) {
+            const shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+            window.open(shareUrl, '_blank');
+        }
+
+        // مشاركة على تويتر
+        function shareOnTwitter(text, url) {
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(shareUrl, '_blank');
+        }
+
+        // مشاركة على فيسبوك
+        function shareOnFacebook(url) {
+            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            window.open(shareUrl, '_blank');
+        }
+
+        // نسخ رابط المشاركة
+        function copyShareLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
+            }).catch(() => {
+                // Fallback for older browsers
+                const tempInput = document.createElement('input');
+                tempInput.value = url;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
+            });
+        }
+
+        // بدء التحميل
+        async function startDownload() {
+            if (!currentApp) {
+                showTempMessage('لم يتم تحميل معلومات التطبيق', 'error');
+                return;
+            }
+
+            const downloadURL = currentApp.downloadURL;
+            
+            console.log("رابط التحميل:", downloadURL);
+            
+            if (downloadURL && downloadURL.startsWith('http')) {
+                try {
+                    // فتح رابط التحميل في نافذة جديدة
+                    const newWindow = window.open(downloadURL, '_blank');
+                    
+                    if (newWindow) {
+                        // زيادة عداد التنزيلات
+                        await updateDownloadCount();
+                        showTempMessage('جاري تحميل التطبيق...', 'success');
+                    } else {
+                        // إذا تم منع النافذة المنبثقة
+                        showTempMessage('تم منع النافذة المنبثقة. يرجى السماح بالنوافذ المنبثقة لهذا الموقع.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error opening download link:', error);
+                    showTempMessage('خطأ في فتح رابط التحميل', 'error');
+                }
+            } else {
+                showTempMessage('رابط التحميل غير صالح أو غير متوفر', 'error');
+                console.error('رابط التحميل غير صالح:', downloadURL);
+            }
+        }
+
+        // تحديث عداد التنزيلات
+        async function updateDownloadCount() {
+            try {
+                if (currentApp && currentApp.id) {
+                    const newDownloadCount = (currentApp.downloads || 0) + 1;
+                    
+                    // تحديث في Firebase
+                    await updateDoc(doc(db, "apps", currentApp.id), {
+                        downloads: newDownloadCount
+                    });
+                    
+                    // تحديث محلياً
+                    currentApp.downloads = newDownloadCount;
+                    
+                    console.log('تم تحديث عداد التنزيلات إلى:', newDownloadCount);
+                }
+            } catch (error) {
+                console.error('Error updating download count:', error);
+            }
+        }
+
+        // العودة إلى الصفحة الرئيسية
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // عرض رسالة مؤقتة
+        function showTempMessage(text, type) {
+            // إزالة أي رسالة سابقة
+            const existingMessage = document.querySelector('.temp-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `temp-message ${type}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                <span>${text}</span>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 3000);
+        }
+
+        // جعل الدوال متاحة globally
+        window.shareOnWhatsApp = shareOnWhatsApp;
+        window.shareOnTwitter = shareOnTwitter;
+        window.shareOnFacebook = shareOnFacebook;
+        window.copyShareLink = copyShareLink;
+        window.startDownload = startDownload;
+        window.goToHome = goToHome;
+
+        // تحميل التطبيق عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadSharedApp);
+    </script> 
+</body>
+</html>
