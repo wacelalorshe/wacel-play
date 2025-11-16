@@ -95,40 +95,18 @@ function formatDate(dateString) {
 // إنشاء رابط المشاركة
 function generateShareLink(appId) {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?app=${appId}`;
+    return `${baseUrl.replace('index.html', '')}share.html?app=${appId}`;
+}
+
+// الانتقال إلى صفحة المشاركة
+function goToSharePage(appId) {
+    window.location.href = `share.html?app=${appId}`;
 }
 
 // مشاركة التطبيق
 async function shareApp(appId, appName) {
-    const shareUrl = generateShareLink(appId);
-    
-    try {
-        const app = allApps.find(a => a.id === appId);
-        if (app) {
-            app.shareCount = (app.shareCount || 0) + 1;
-        }
-
-        if (navigator.share) {
-            await navigator.share({
-                title: `تحميل ${appName}`,
-                text: `اكتشف هذا التطبيق الرائع: ${appName}`,
-                url: shareUrl,
-            });
-            showTempMessage('تم مشاركة التطبيق بنجاح!', 'success');
-        } else {
-            await navigator.clipboard.writeText(shareUrl);
-            showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
-        }
-        
-        updateCurrentDisplay();
-        
-    } catch (error) {
-        console.error('Error sharing app:', error);
-        if (error.name !== 'AbortError') {
-            // Fallback: فتح نافذة جديدة
-            window.open(`https://twitter.com/intent/tweet?text=اكتشف هذا التطبيق الرائع: ${appName}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-        }
-    }
+    // الانتقال إلى صفحة المشاركة بدلاً من المشاركة المباشرة
+    goToSharePage(appId);
 }
 
 // تحميل التطبيقات من Firebase أو استخدام البيانات التجريبية
@@ -247,7 +225,7 @@ function createAppCard(app) {
         : `<div class="app-icon"><i class="${iconClass}"></i></div>`;
     
     return `
-        <div class="app-card" data-category="${app.category}" data-id="${app.id}">
+        <div class="app-card" data-category="${app.category}" data-id="${app.id}" onclick="goToSharePage('${app.id}')" style="cursor: pointer;">
             <div class="app-header">
                 ${appIcon}
                 <div class="app-info">
@@ -279,14 +257,14 @@ function createAppCard(app) {
             ${app.featured ? '<div class="featured-badge">⭐ مميز</div>' : ''}
             ${app.trending ? '<div class="trending-badge">🔥 شائع</div>' : ''}
             <div class="app-actions">
-                <button class="download-btn" onclick="downloadApp('${app.downloadURL}', '${app.id}')">
+                <button class="download-btn" onclick="downloadApp('${app.downloadURL}', '${app.id}'); event.stopPropagation()">
                     <i class="fas fa-download"></i>
                     تحميل
                 </button>
-                <button class="share-btn" onclick="shareApp('${app.id}', '${app.name}')">
+                <button class="share-btn" onclick="goToSharePage('${app.id}'); event.stopPropagation()">
                     <i class="fas fa-share-alt"></i>                     مشاركة                 </button>
                 ${isAdmin() ? `
-                    <button class="delete-btn" onclick="deleteApp('${app.id}')">
+                    <button class="delete-btn" onclick="deleteApp('${app.id}'); event.stopPropagation()">
                         <i class="fas fa-trash"></i>
                     </button>
                 ` : ''}
@@ -683,3 +661,4 @@ window.downloadApp = downloadApp;
 window.deleteApp = deleteApp;
 window.shareApp = shareApp;
 window.displaySpecialSection = displaySpecialSection;
+window.goToSharePage = goToSharePage;
