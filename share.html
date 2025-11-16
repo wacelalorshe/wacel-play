@@ -15,8 +15,8 @@
     <meta property="og:image" content="https://wacel-play.netlify.app/images/logo.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
+        /* الأنماط الحالية لـ share.html تبقى كما هي */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
@@ -467,47 +467,59 @@
         </div>
     </main>
 
-    <script>
-        // بيانات تجريبية للتطبيق (يمكن استبدالها بالبيانات الفعلية من Firebase)
-        const mockApp = {
-            id: "app123",
-            name: "تطبيق تجريبي",
-            description: "هذا تطبيق تجريبي رائع يحتوي على العديد من الميزات المفيدة",
-            category: "utility",
-            iconURL: "",
-            downloads: 150,
-            shareCount: 45,
-            rating: 4.5,
-            version: "1.2.3",
-            size: "15",
-            features: ["واجهة مستخدم سهلة", "أداء سريع", "مجاني بالكامل"],
-            createdAt: new Date(),
-            downloadURL: "https://example.com/app.apk"
+    <script type="module">
+        // استيراد دوال Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            updateDoc 
+        } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6h-oOG7xteSiJt2jDpSyGitiPp0aDimI",
+            authDomain: "wacelmarkt.firebaseapp.com",
+            projectId: "wacelmarkt",
+            storageBucket: "wacelmarkt.firebasestorage.app",
+            messagingSenderId: "662446208797",
+            appId: "1:662446208797:web:a3cc83551d42761e4753f4"
         };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         // الحصول على معرّف التطبيق من URL
         const urlParams = new URLSearchParams(window.location.search);
         const appId = urlParams.get('app');
         let currentApp = null;
 
-        // تحميل التطبيق
+        // تحميل التطبيق من Firebase
         async function loadSharedApp() {
             try {
                 if (!appId) {
-                    // استخدام البيانات التجريبية إذا لم يكن هناك appId
-                    currentApp = mockApp;
-                    console.log("استخدام بيانات تجريبية:", currentApp);
-                } else {
-                    // هنا يمكنك إضافة كود جلب البيانات من Firebase
-                    console.log("جاري تحميل التطبيق:", appId);
-                    // محاكاة جلب البيانات من Firebase
-                    currentApp = mockApp;
-                    currentApp.id = appId;
+                    throw new Error('لم يتم تحديد تطبيق للمشاركة');
                 }
                 
-                // تحديث بيانات التعريف
-                updateMetaTags(currentApp);
-                displayShareContent(currentApp);
+                console.log("جاري تحميل التطبيق:", appId);
+                
+                // محاولة الحصول على التطبيق من Firebase
+                const appDoc = await getDoc(doc(db, "apps", appId));
+                
+                if (appDoc.exists()) {
+                    currentApp = {
+                        id: appDoc.id,
+                        ...appDoc.data()
+                    };
+                    console.log("تم تحميل التطبيق:", currentApp);
+                    
+                    // تحديث بيانات التعريف
+                    updateMetaTags(currentApp);
+                    displayShareContent(currentApp);
+                } else {
+                    throw new Error('التطبيق غير موجود في قاعدة البيانات');
+                }
 
             } catch (error) {
                 console.error('Error loading shared app:', error);
@@ -828,7 +840,7 @@
         }
 
         // بدء التحميل
-        function startDownload() {
+        async function startDownload() {
             if (!currentApp) {
                 showTempMessage('لم يتم تحميل معلومات التطبيق', 'error');
                 return;
@@ -844,6 +856,8 @@
                     const newWindow = window.open(downloadURL, '_blank');
                     
                     if (newWindow) {
+                        // زيادة عداد التنزيلات
+                        await updateDownloadCount();
                         showTempMessage('جاري تحميل التطبيق...', 'success');
                     } else {
                         // إذا تم منع النافذة المنبثقة
@@ -856,6 +870,27 @@
             } else {
                 showTempMessage('رابط التحميل غير صالح أو غير متوفر', 'error');
                 console.error('رابط التحميل غير صالح:', downloadURL);
+            }
+        }
+
+        // تحديث عداد التنزيلات
+        async function updateDownloadCount() {
+            try {
+                if (currentApp && currentApp.id) {
+                    const newDownloadCount = (currentApp.downloads || 0) + 1;
+                    
+                    // تحديث في Firebase
+                    await updateDoc(doc(db, "apps", currentApp.id), {
+                        downloads: newDownloadCount
+                    });
+                    
+                    // تحديث محلياً
+                    currentApp.downloads = newDownloadCount;
+                    
+                    console.log('تم تحديث عداد التنزيلات إلى:', newDownloadCount);
+                }
+            } catch (error) {
+                console.error('Error updating download count:', error);
             }
         }
 
@@ -887,6 +922,15 @@
                 }
             }, 3000);
         }
+
+        // جعل الدوال متاحة globally
+        window.shareOnWhatsApp = shareOnWhatsApp;
+        window.shareOnTwitter = shareOnTwitter;
+        window.shareOnFacebook = shareOnFacebook;
+        window.shareOnTelegram = shareOnTelegram;
+        window.copyShareLink = copyShareLink;
+        window.startDownload = startDownload;
+        window.goToHome = goToHome;
 
         // تحميل التطبيق عند فتح الصفحة
         document.addEventListener('DOMContentLoaded', loadSharedApp);
