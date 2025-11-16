@@ -105,17 +105,19 @@
 
         .modal-content {
             background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: var(--shadow-md);
             margin: 2% auto;
       padding: 10px;
-max-width: 100%;
-      width: 50%;
+max-width: 600%;
+      width: 70%;
       text-align: center;
       font-size: 1px; /* حجم الخط الافتراضي */
       border-radius: 35px;
-            position: relative;
+
+border-bottom: 20px groove #F3EDEA;
+    border-top: 20px ridge #F3EDEA;
+border-left: 15px ridge #F3EDEA;
+border-right: 15px  groove #F3EDEA;
+
         }
 
         .close {
