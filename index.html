@@ -2,7 +2,76 @@
 <html lang="ar" dir="rtl">
    <meta name="google-site-verification" content="yv8Fapy9yxl2XxCh03uMYT4h-T8OShA4EnsGmg_Hbh0" /> 
 <head>
+<!-- PWA Meta Tags -->
+<meta name="application-name" content="وسيل بلاي">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="وسيل بلاي">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileColor" content="#4361ee">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="theme-color" content="#4361ee">
 
+<!-- Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Icons -->
+<link rel="icon" type="image/png" href="icons/icon-72x72.png">
+<link rel="apple-touch-icon" href="icons/icon-152x152.png">
+
+<!-- Service Worker Registration -->
+<script>
+// تسجيل Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+
+// اكتشاف إمكانية التثبيت
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // عرض زر التثبيت
+    const installButton = document.createElement('button');
+    installButton.innerHTML = '📲 تثبيت التطبيق';
+    installButton.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        font-family: inherit;
+    `;
+    
+    installButton.addEventListener('click', () => {
+        installButton.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    });
+    
+    document.body.appendChild(installButton);
+});
+</script>
     <meta name="google-site-verification" content="yv8Fapy9yxl2XxCh03uMYT4h-T8OShA4EnsGmg_Hbh0" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
