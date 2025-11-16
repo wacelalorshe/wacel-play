@@ -90,6 +90,7 @@
             box-shadow: var(--shadow);
         }
 
+        /* تحسينات النافذة المنبثقة */
         .modal {
             display: none;
             position: fixed;
@@ -101,23 +102,36 @@
             z-index: 2000;
             justify-content: center;
             align-items: center;
+            padding: 1rem;
+            overflow-y: auto;
         }
 
         .modal-content {
-            background: white;
-            margin: 2% auto;
-      padding: 10px;
-max-width: 600%;
-      width: 70%;
-      text-align: center;
-      font-size: 1px; /* حجم الخط الافتراضي */
-      border-radius: 35px;
+            background-color: var(--bg-secondary);
+            padding: 12rem;
+            border-radius: 88px;
+            border-bottom: 13px groove #000;
+    border-top: 13px ridge #000;
+border-left: 3px ridge #000;
+border-right: 3px  groove #000;
+            box-shadow: var(--shadow-md);
+            max-width: 600px;
+            width: 80%;
+            position: relative;
+            max-height: 100vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease-out;
+        }
 
-border-bottom: 20px groove #F3EDEA;
-    border-top: 20px ridge #F3EDEA;
-border-left: 15px ridge #F3EDEA;
-border-right: 15px  groove #F3EDEA;
-
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .close {
@@ -127,6 +141,19 @@ border-right: 15px  groove #F3EDEA;
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.05);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: rotate(90deg);
         }
 
         /* styles/admin.css - الإصدار المحدث بمقاسات الأيقونات المتجاوبة */
@@ -551,6 +578,19 @@ border-right: 15px  groove #F3EDEA;
             .admin-app-card .app-header {
                 gap: 1rem;
             }
+
+            /* تحسينات إضافية للنافذة المنبثقة على الشاشات الصغيرة */
+            .modal {
+                padding: 0.5rem;
+                align-items: flex-start;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+                max-height: calc(100vh - 2rem);
+            }
         }
 
         @media (max-width: 480px) {
@@ -583,6 +623,25 @@ border-right: 15px  groove #F3EDEA;
             
             .admin-app-card h4 {
                 font-size: 1.1rem;
+            }
+
+            /* تحسينات إضافية للنافذة المنبثقة على الشاشات الصغيرة جداً */
+            .modal-content {
+                padding: 1rem;
+                border-radius: 28px;
+            }
+            
+            .modal-content h3 {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            
+            input, select, textarea {
+                padding: 0.7rem;
             }
         }
 
@@ -956,4 +1015,60 @@ border-right: 15px  groove #F3EDEA;
             display: flex;
             flex-direction: column;
             gap: 5px;
+        }
+
+        /* أنماط الرسائل */
+        .message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* تحسينات إضافية للنافذة المنبثقة */
+        .modal-scrollable .modal-content {
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        /* تحسينات للشاشات الطويلة */
+        @media (max-height: 700px) {
+            .modal-content {
+                max-height: 95vh;
+            }
+            
+            .modal-scrollable .modal-content {
+                max-height: 90vh;
+            }
+        }
+
+        /* تحسينات للشاشات القصيرة جداً */
+        @media (max-height: 500px) {
+            .modal {
+                align-items: flex-start;
+            }
+            
+            .modal-content {
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                max-height: calc(100vh - 1rem);
+            }
         }
