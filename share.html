@@ -1,4 +1,4 @@
-ث<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -15,103 +15,8 @@
     <meta property="og:image" content="https://wacel-play.netlify.app/images/logo.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles/style.css">
-    
-    <script>
-        // دالة لتحديث بيانات التعريف ديناميكياً
-        function updateMetaTags(app) {
-            if (!app) return;
-            
-            // تحديث العنوان
-            document.title = `${app.name} - تحميل مجاني | وسيل بلاي`;
-            
-            // تحديث وصف الصفحة
-            let metaDescription = document.querySelector('meta[name="description"]');
-            if (!metaDescription) {
-                metaDescription = document.createElement('meta');
-                metaDescription.name = 'description';
-                document.head.appendChild(metaDescription);
-            }
-            metaDescription.content = `${app.description} - حمّل ${app.name} مجاناً من وسيل بلاي. ${app.size}MB | الإصدار ${app.version}`;
-            
-            // تحديث Open Graph
-            updateMetaProperty('og:title', `${app.name} - وسيل بلاي`);
-            updateMetaProperty('og:description', app.description);
-            updateMetaProperty('og:url', window.location.href);
-            
-            if (app.iconURL) {
-                updateMetaProperty('og:image', app.iconURL);
-            }
-            
-            // إضافة Structured Data للتطبيق
-            addAppStructuredData(app);
-        }
-        
-        function updateMetaProperty(property, content) {
-            let meta = document.querySelector(`meta[property="${property}"]`);
-            if (!meta) {
-                meta = document.createElement('meta');
-                meta.setAttribute('property', property);
-                document.head.appendChild(meta);
-            }
-            meta.setAttribute('content', content);
-        }
-        
-        function addAppStructuredData(app) {
-            // إزالة أي Structured Data موجود مسبقاً
-            const existingSchema = document.querySelector('script[type="application/ld+json"]');
-            if (existingSchema) {
-                existingSchema.remove();
-            }
-            
-            const schema = {
-                "@context": "https://schema.org",
-                "@type": "SoftwareApplication",
-                "name": app.name,
-                "description": app.description,
-                "applicationCategory": getSchemaCategory(app.category),
-                "operatingSystem": "ANDROID",
-                "offers": {
-                    "@type": "Offer",
-                    "price": "0",
-                    "priceCurrency": "USD"
-                },
-                "author": {
-                    "@type": "Organization",
-                    "name": "وسيل بلاي"
-                },
-                "downloadUrl": app.downloadURL
-            };
-            
-            if (app.rating) {
-                schema.aggregateRating = {
-                    "@type": "AggregateRating",
-                    "ratingValue": app.rating.toString(),
-                    "ratingCount": "100"
-                };
-            }
-            
-            const script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.textContent = JSON.stringify(schema);
-            document.head.appendChild(script);
-        }
-        
-        function getSchemaCategory(category) {
-            const categories = {
-                'games': 'GameApplication',
-                'social': 'SocialNetworkingApplication',
-                'entertainment': 'EntertainmentApplication',
-                'productivity': 'BusinessApplication',
-                'education': 'EducationalApplication',
-                'utility': 'UtilityApplication'
-            };
-            return categories[category] || 'MobileApplication';
-        }
-    </script>
     
     <style>
-        /* الأنماط الحالية لـ share.html تبقى كما هي */
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
@@ -317,6 +222,11 @@
         
         .btn-facebook {
             background: #1877F2;
+            color: white;
+        }
+        
+        .btn-telegram {
+            background: #0088cc;
             color: white;
         }
         
@@ -557,64 +467,88 @@
         </div>
     </main>
 
-    <script type="module">
-        // استيراد دوال Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            updateDoc 
-        } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC6h-oOG7xteSiJt2jDpSyGitiPp0aDimI",
-            authDomain: "wacelmarkt.firebaseapp.com",
-            projectId: "wacelmarkt",
-            storageBucket: "wacelmarkt.firebasestorage.app",
-            messagingSenderId: "662446208797",
-            appId: "1:662446208797:web:a3cc83551d42761e4753f4"
+    <script>
+        // بيانات تجريبية للتطبيق (يمكن استبدالها بالبيانات الفعلية من Firebase)
+        const mockApp = {
+            id: "app123",
+            name: "تطبيق تجريبي",
+            description: "هذا تطبيق تجريبي رائع يحتوي على العديد من الميزات المفيدة",
+            category: "utility",
+            iconURL: "",
+            downloads: 150,
+            shareCount: 45,
+            rating: 4.5,
+            version: "1.2.3",
+            size: "15",
+            features: ["واجهة مستخدم سهلة", "أداء سريع", "مجاني بالكامل"],
+            createdAt: new Date(),
+            downloadURL: "https://example.com/app.apk"
         };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
 
         // الحصول على معرّف التطبيق من URL
         const urlParams = new URLSearchParams(window.location.search);
         const appId = urlParams.get('app');
         let currentApp = null;
 
-        // تحميل التطبيق من Firebase
+        // تحميل التطبيق
         async function loadSharedApp() {
             try {
                 if (!appId) {
-                    throw new Error('لم يتم تحديد تطبيق للمشاركة');
-                }
-                
-                console.log("جاري تحميل التطبيق:", appId);
-                
-                // محاولة الحصول على التطبيق من Firebase
-                const appDoc = await getDoc(doc(db, "apps", appId));
-                
-                if (appDoc.exists()) {
-                    currentApp = {
-                        id: appDoc.id,
-                        ...appDoc.data()
-                    };
-                    console.log("تم تحميل التطبيق:", currentApp);
-                    
-                    // تحديث بيانات التعريف
-                    updateMetaTags(currentApp);
-                    displayShareContent(currentApp);
+                    // استخدام البيانات التجريبية إذا لم يكن هناك appId
+                    currentApp = mockApp;
+                    console.log("استخدام بيانات تجريبية:", currentApp);
                 } else {
-                    throw new Error('التطبيق غير موجود في قاعدة البيانات');
+                    // هنا يمكنك إضافة كود جلب البيانات من Firebase
+                    console.log("جاري تحميل التطبيق:", appId);
+                    // محاكاة جلب البيانات من Firebase
+                    currentApp = mockApp;
+                    currentApp.id = appId;
                 }
+                
+                // تحديث بيانات التعريف
+                updateMetaTags(currentApp);
+                displayShareContent(currentApp);
 
             } catch (error) {
                 console.error('Error loading shared app:', error);
                 showErrorState('عذراً، لم يتم العثور على التطبيق المطلوب.');
             }
+        }
+
+        // دالة لتحديث بيانات التعريف ديناميكياً
+        function updateMetaTags(app) {
+            if (!app) return;
+            
+            // تحديث العنوان
+            document.title = `${app.name} - تحميل مجاني | وسيل بلاي`;
+            
+            // تحديث وصف الصفحة
+            let metaDescription = document.querySelector('meta[name="description"]');
+            if (!metaDescription) {
+                metaDescription = document.createElement('meta');
+                metaDescription.name = 'description';
+                document.head.appendChild(metaDescription);
+            }
+            metaDescription.content = `${app.description} - حمّل ${app.name} مجاناً من وسيل بلاي. ${app.size}MB | الإصدار ${app.version}`;
+            
+            // تحديث Open Graph
+            updateMetaProperty('og:title', `${app.name} - وسيل بلاي`);
+            updateMetaProperty('og:description', app.description);
+            updateMetaProperty('og:url', window.location.href);
+            
+            if (app.iconURL) {
+                updateMetaProperty('og:image', app.iconURL);
+            }
+        }
+        
+        function updateMetaProperty(property, content) {
+            let meta = document.querySelector(`meta[property="${property}"]`);
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.setAttribute('property', property);
+                document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
         }
 
         // عرض محتوى المشاركة
@@ -719,9 +653,13 @@
                             <i class="fab fa-twitter"></i>
                             تويتر
                         </button>
-                        <button class="btn-share-social btn-facebook" onclick="shareOnFacebook('${shareUrl}')">
+                        <button class="btn-share-social btn-facebook" onclick="shareOnFacebook('${shareText}', '${shareUrl}')">
                             <i class="fab fa-facebook"></i>
                             فيسبوك
+                        </button>
+                        <button class="btn-share-social btn-telegram" onclick="shareOnTelegram('${shareText}', '${shareUrl}')">
+                            <i class="fab fa-telegram"></i>
+                            تيليجرام
                         </button>
                     </div>
                     
@@ -797,42 +735,100 @@
             }
         }
 
-        // مشاركة على واتساب
+        // مشاركة على واتساب - الإصدار المحسن
         function shareOnWhatsApp(text, url) {
-            const shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-            window.open(shareUrl, '_blank');
+            try {
+                // استخدام رابط واتساب الرسمي
+                const fullText = `${text} ${url}`;
+                const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullText)}`;
+                
+                // فتح في نافذة جديدة
+                window.open(shareUrl, '_blank', 'width=600,height=500');
+                
+                showTempMessage('جاري فتح واتساب...', 'success');
+            } catch (error) {
+                console.error('خطأ في مشاركة واتساب:', error);
+                showTempMessage('حدث خطأ في مشاركة واتساب', 'error');
+            }
         }
 
-        // مشاركة على تويتر
+        // مشاركة على تويتر - الإصدار المحسن
         function shareOnTwitter(text, url) {
-            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-            window.open(shareUrl, '_blank');
+            try {
+                // استخدام رابط تويتر الرسمي للمشاركة
+                const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                
+                // فتح في نافذة جديدة
+                window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                showTempMessage('جاري فتح تويتر...', 'success');
+            } catch (error) {
+                console.error('خطأ في مشاركة تويتر:', error);
+                showTempMessage('حدث خطأ في مشاركة تويتر', 'error');
+            }
         }
 
-        // مشاركة على فيسبوك
-        function shareOnFacebook(url) {
-            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-            window.open(shareUrl, '_blank');
+        // مشاركة على فيسبوك - الإصدار المحسن
+        function shareOnFacebook(text, url) {
+            try {
+                // استخدام رابط فيسبوك الرسمي للمشاركة
+                const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+                
+                // فتح في نافذة جديدة
+                window.open(shareUrl, '_blank', 'width=600,height=500');
+                
+                showTempMessage('جاري فتح فيسبوك...', 'success');
+            } catch (error) {
+                console.error('خطأ في مشاركة فيسبوك:', error);
+                showTempMessage('حدث خطأ في مشاركة فيسبوك', 'error');
+            }
+        }
+
+        // مشاركة على تيليجرام - إضافة جديدة
+        function shareOnTelegram(text, url) {
+            try {
+                const fullText = `${text} ${url}`;
+                const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+                
+                // فتح في نافذة جديدة
+                window.open(shareUrl, '_blank', 'width=600,height=500');
+                
+                showTempMessage('جاري فتح تيليجرام...', 'success');
+            } catch (error) {
+                console.error('خطأ في مشاركة تيليجرام:', error);
+                showTempMessage('حدث خطأ في مشاركة تيليجرام', 'error');
+            }
         }
 
         // نسخ رابط المشاركة
         function copyShareLink(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
-            }).catch(() => {
-                // Fallback for older browsers
-                const tempInput = document.createElement('input');
-                tempInput.value = url;
-                document.body.appendChild(tempInput);
-                tempInput.select();
+            // إنشاء عنصر نصي مؤقت
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); // للهواتف المحمولة
+            
+            try {
+                // محاولة استخدام Clipboard API الحديث
+                navigator.clipboard.writeText(url).then(() => {
+                    showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
+                }).catch(() => {
+                    // استخدام الطريقة القديمة إذا فشلت
+                    document.execCommand('copy');
+                    showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
+                });
+            } catch (err) {
+                // استخدام الطريقة القديمة إذا فشلت
                 document.execCommand('copy');
-                document.body.removeChild(tempInput);
                 showTempMessage('تم نسخ رابط المشاركة إلى الحافظة!', 'success');
-            });
+            } finally {
+                document.body.removeChild(tempInput);
+            }
         }
 
         // بدء التحميل
-        async function startDownload() {
+        function startDownload() {
             if (!currentApp) {
                 showTempMessage('لم يتم تحميل معلومات التطبيق', 'error');
                 return;
@@ -848,8 +844,6 @@
                     const newWindow = window.open(downloadURL, '_blank');
                     
                     if (newWindow) {
-                        // زيادة عداد التنزيلات
-                        await updateDownloadCount();
                         showTempMessage('جاري تحميل التطبيق...', 'success');
                     } else {
                         // إذا تم منع النافذة المنبثقة
@@ -862,27 +856,6 @@
             } else {
                 showTempMessage('رابط التحميل غير صالح أو غير متوفر', 'error');
                 console.error('رابط التحميل غير صالح:', downloadURL);
-            }
-        }
-
-        // تحديث عداد التنزيلات
-        async function updateDownloadCount() {
-            try {
-                if (currentApp && currentApp.id) {
-                    const newDownloadCount = (currentApp.downloads || 0) + 1;
-                    
-                    // تحديث في Firebase
-                    await updateDoc(doc(db, "apps", currentApp.id), {
-                        downloads: newDownloadCount
-                    });
-                    
-                    // تحديث محلياً
-                    currentApp.downloads = newDownloadCount;
-                    
-                    console.log('تم تحديث عداد التنزيلات إلى:', newDownloadCount);
-                }
-            } catch (error) {
-                console.error('Error updating download count:', error);
             }
         }
 
@@ -914,14 +887,6 @@
                 }
             }, 3000);
         }
-
-        // جعل الدوال متاحة globally
-        window.shareOnWhatsApp = shareOnWhatsApp;
-        window.shareOnTwitter = shareOnTwitter;
-        window.shareOnFacebook = shareOnFacebook;
-        window.copyShareLink = copyShareLink;
-        window.startDownload = startDownload;
-        window.goToHome = goToHome;
 
         // تحميل التطبيق عند فتح الصفحة
         document.addEventListener('DOMContentLoaded', loadSharedApp);
