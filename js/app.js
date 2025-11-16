@@ -284,8 +284,7 @@ function createAppCard(app) {
                     تحميل
                 </button>
                 <button class="share-btn" onclick="shareApp('${app.id}', '${app.name}')">
-                    <i class="fas fa-share-alt"></i>
-                </button>
+                    <i class="fas fa-share-alt"></i>                     مشاركة                 </button>
                 ${isAdmin() ? `
                     <button class="delete-btn" onclick="deleteApp('${app.id}')">
                         <i class="fas fa-trash"></i>
@@ -353,4 +352,334 @@ function generateRatingStars(rating) {
     
     let stars = '';
     
-    for (let i = 0; i <
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    
+    if (halfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    
+    return stars;
+}
+
+// الحصول على أيقونة التطبيق حسب التصنيف
+function getAppIcon(category) {
+    const icons = {
+        'games': 'fas fa-gamepad',
+        'social': 'fas fa-comments',
+        'entertainment': 'fas fa-film',
+        'productivity': 'fas fa-briefcase',
+        'education': 'fas fa-graduation-cap',
+        'utility': 'fas fa-tools'
+    };
+    return icons[category] || 'fas fa-mobile-alt';
+}
+
+// الحصول على اسم التصنيف
+function getCategoryName(category) {
+    const categories = {
+        'games': 'الألعاب',
+        'social': 'التواصل الاجتماعي',
+        'entertainment': 'الترفيه',
+        'productivity': 'فتوغرافي',
+        'education': 'الذكاء الاصطناعي',
+        'utility': 'الأدوات'
+    };
+    return categories[category] || category;
+}
+
+// تصفية التطبيقات حسب الفئة
+function filterApps(category) {
+    console.log("تصفية التطبيقات حسب الفئة:", category);
+    
+    currentFilter = category;
+    visibleAppsCount = 5;
+    
+    document.querySelectorAll('.category-filter').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.category === category) {
+            btn.classList.add('active');
+        }
+    });
+    
+    const filteredApps = category === 'all' 
+        ? allApps 
+        : allApps.filter(app => app.category === category);
+    
+    displayApps(filteredApps.slice(0, visibleAppsCount));
+    setupLoadMoreButton();
+    
+    const appsList = document.getElementById('apps-list');
+    if (appsList) {
+        appsList.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// البحث في التطبيقات
+function searchApps() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    console.log("الببحث عن:", searchTerm);
+    
+    const searchModal = document.getElementById('searchModal');
+    if (searchModal) {
+        searchModal.style.display = 'none';
+    }
+    
+    if (!searchTerm) {
+        visibleAppsCount = 5;
+        displayApps(allApps.slice(0, visibleAppsCount));
+        setupLoadMoreButton();
+        return;
+    }
+    
+    const filteredApps = allApps.filter(app => 
+        app.name.toLowerCase().includes(searchTerm) ||
+        app.description.toLowerCase().includes(searchTerm) ||
+        getCategoryName(app.category).toLowerCase().includes(searchTerm)
+    );
+    
+    visibleAppsCount = filteredApps.length;
+    displayApps(filteredApps);
+    setupLoadMoreButton();
+    
+    const appsContainer = document.getElementById('apps-list');
+    if (appsContainer && filteredApps.length > 0) {
+        const resultsHeader = document.createElement('div');
+        resultsHeader.className = 'search-results-header';
+        resultsHeader.innerHTML = `<p>عرض ${filteredApps.length} نتيجة للبحث عن: "${searchTerm}"</p>`;
+        appsContainer.insertBefore(resultsHeader, appsContainer.firstChild);
+    }
+}
+
+// البحث المباشر (عند الضغط على Enter)
+function performSearch() {
+    searchApps();
+}
+
+// تحميل التطبيق
+function downloadApp(downloadURL, appId) {
+    console.log("تحميل التطبيق:", appId);
+    
+    const app = allApps.find(app => app.id === appId);
+    if (app) {
+        app.downloads = (app.downloads || 0) + 1;
+        updateCurrentDisplay();
+    }
+    
+    if (downloadURL && downloadURL !== 'https://example.com/app1.zip') {
+        window.open(downloadURL, '_blank');
+    } else {
+        alert('هذا رابط تجريبي. في التطبيق الحقيقي، سيبدأ التحميل.');
+    }
+    
+    showTempMessage('جاري تحميل التطبيق...', 'success');
+}
+
+// حذف التطبيق (للمسؤول فقط)
+async function deleteApp(appId) {
+    if (!confirm('هل أنت متأكد من حذف هذا التطبيق؟')) return;
+    
+    try {
+        console.log("جاري حذف التطبيق:", appId);
+        
+        const app = allApps.find(app => app.id === appId);
+        if (app && window.firebaseDb && !sampleApps.some(sample => sample.id === appId)) {
+            await firebaseDb.doc(`apps/${appId}`).delete();
+        }
+        
+        allApps = allApps.filter(app => app.id !== appId);
+        currentDisplayedApps = currentDisplayedApps.filter(app => app.id !== appId);
+        
+        displayApps(currentDisplayedApps);
+        setupLoadMoreButton();
+        
+        showTempMessage('تم حذف التطبيق بنجاح', 'success');
+        
+    } catch (error) {
+        console.error("خطأ في حذف التطبيق:", error);
+        showTempMessage('خطأ في حذف التطبيق', 'error');
+    }
+}
+
+// التحقق إذا كان المستخدم مسؤولاً
+function isAdmin() {
+    return localStorage.getItem('isAdmin') === 'true';
+}
+
+// عرض رسالة مؤقتة
+function showTempMessage(text, type) {
+    // إزالة أي رسائل سابقة
+    const existingMessages = document.querySelectorAll('.temp-message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `temp-message ${type}`;
+    messageDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+        <span>${text}</span>
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    setTimeout(() => {
+        messageDiv.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// عرض الأقسام الخاصة
+function displaySpecialSection(section) {
+    document.querySelectorAll('.special-section-content').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    document.querySelectorAll('.section-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    const activeTab = document.querySelector(`.section-tab[data-section="${section}"]`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+    
+    const sectionElement = document.getElementById(`${section}-section`);
+    if (sectionElement) {
+        sectionElement.style.display = 'block';
+        
+        let specialApps = [];
+        
+        switch(section) {
+            case 'featured':
+                specialApps = allApps.filter(app => app.featured);
+                break;
+            case 'trending':
+                specialApps = allApps.filter(app => app.trending);
+                break;
+            case 'top':
+                specialApps = allApps.filter(app => app.rating >= 4.5);
+                break;
+        }
+        
+        const appsContainer = document.getElementById(`${section}-apps`);
+        if (appsContainer) {
+            if (specialApps.length === 0) {
+                appsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i><p>لا توجد تطبيقات في هذا القسم</p></div>';
+            } else {
+                let html = '';
+                specialApps.forEach((app) => {
+                    html += createAppCard(app);
+                });
+                appsContainer.innerHTML = html;
+                setupDescriptionToggle();
+            }
+        }
+        
+        sectionElement.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// إعداد التنقل في الشريط السفلي
+function setupBottomNavigation() {
+    const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+    
+    bottomNavItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            bottomNavItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            const target = this.getAttribute('href');
+            console.log("النقر على:", target);
+            
+            switch(target) {
+                case '#games':
+                    filterApps('games');
+                    break;
+                case '#apps':
+                    filterApps('all');
+                    break;
+                case '#search':
+                    document.getElementById('searchModal').style.display = 'block';
+                    break;
+            }
+        });
+    });
+}
+
+// إعداد أحداث الفئات للشريط الأفقي
+function setupCategoryEvents() {
+    const categoryFilters = document.querySelectorAll('.category-filter');
+    
+    categoryFilters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            categoryFilters.forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+}
+
+// إعداد أزرار الأقسام الخاصة
+function setupSectionTabs() {
+    const sectionTabs = document.querySelectorAll('.section-tab');
+    
+    sectionTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const section = this.dataset.section;
+            displaySpecialSection(section);
+        });
+    });
+}
+
+// تهيئة الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("تهيئة صفحة المتجر...");
+    
+    // تحميل التطبيقات
+    loadApps();
+    
+    // إعداد مستمعات الأحداث للبحث
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+    
+    // إعداد التنقل في الشريط السفلي
+    setupBottomNavigation();
+    
+    // إعداد أحداث الفئات
+    setupCategoryEvents();
+    
+    // إعداد أزرار الأقسام الخاصة
+    setupSectionTabs();
+    
+    console.log("تم تهيئة صفحة المتجر بالكامل");
+});
+
+// جعل الدوال متاحة globally
+window.filterApps = filterApps;
+window.searchApps = searchApps;
+window.performSearch = performSearch;
+window.downloadApp = downloadApp;
+window.deleteApp = deleteApp;
+window.shareApp = shareApp;
+window.displaySpecialSection = displaySpecialSection;
