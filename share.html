@@ -719,7 +719,7 @@
                             <i class="fab fa-twitter"></i>
                             تويتر
                         </button>
-                        <button class="btn-share-social btn-facebook" onclick="shareOnFacebook('${shareUrl}')">
+                        <button class="btn-share-social btn-facebook" onclick="shareOnFacebook('${shareText}', '${shareUrl}')">
                             <i class="fab fa-facebook"></i>
                             فيسبوك
                         </button>
@@ -797,22 +797,56 @@
             }
         }
 
-        // مشاركة على واتساب
+        // مشاركة على واتساب - تم التعديل
         function shareOnWhatsApp(text, url) {
-            const shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-            window.open(shareUrl, '_blank');
+            try {
+                const fullText = `${text} ${url}`;
+                const encodedText = encodeURIComponent(fullText);
+                const shareUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+                
+                // محاولة فتح النافذة المنبثقة
+                const newWindow = window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    // إذا تم منع النافذة المنبثقة، افتح في نفس النافذة
+                    window.location.href = shareUrl;
+                }
+            } catch (error) {
+                console.error('خطأ في مشاركة واتساب:', error);
+                showTempMessage('حدث خطأ في مشاركة واتساب', 'error');
+            }
         }
 
         // مشاركة على تويتر
         function shareOnTwitter(text, url) {
-            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-            window.open(shareUrl, '_blank');
+            try {
+                const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                
+                const newWindow = window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    window.location.href = shareUrl;
+                }
+            } catch (error) {
+                console.error('خطأ في مشاركة تويتر:', error);
+                showTempMessage('حدث خطأ في مشاركة تويتر', 'error');
+            }
         }
 
-        // مشاركة على فيسبوك
-        function shareOnFacebook(url) {
-            const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-            window.open(shareUrl, '_blank');
+        // مشاركة على فيسبوك - تم التعديل
+        function shareOnFacebook(text, url) {
+            try {
+                const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+                
+                const newWindow = window.open(shareUrl, '_blank', 'width=600,height=400');
+                
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    window.location.href = shareUrl;
+                }
+            } catch (error) {
+                console.error('خطأ في مشاركة فيسبوك:', error);
+                showTempMessage('حدث خطأ في مشاركة فيسبوك', 'error');
+            }
         }
 
         // نسخ رابط المشاركة
