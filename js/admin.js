@@ -41,7 +41,7 @@ function formatDate(dateString) {
 // إنشاء رابط المشاركة
 function generateShareLink(appId) {
     const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', '');
-    return `${baseUrl}?app=${appId}`;
+    return `${baseUrl}share.html?app=${appId}`;
 }
 
 // فتح نافذة التعديل
@@ -380,6 +380,7 @@ function displayAdminApps() {
             <div class="share-link-section">
                 <label>رابط المشاركة:</label>
                 <div class="share-link-container">
+                    <a href="${generateShareLink(app.id)}" target="_blank" class="share-link-preview">فتح صفحة المشاركة</a>
                     <input type="text" id="shareLink-${app.id}" value="${generateShareLink(app.id)}" readonly class="share-link-input">
                     <button class="btn-copy" onclick="copyShareLink('${app.id}')">نسخ</button>
                 </div>
