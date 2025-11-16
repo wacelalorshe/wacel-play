@@ -108,8 +108,13 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: var(--shadow-md);
-            max-width: 500px;
-            width: 90%;
+            margin: 2% auto;
+      padding: 10px;
+max-width: 100%;
+      width: 50%;
+      text-align: center;
+      font-size: 1px; /* حجم الخط الافتراضي */
+      border-radius: 35px;
             position: relative;
         }
 
