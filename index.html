@@ -253,47 +253,146 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- PWA Installation System -->
+        <!-- PWA Installation System -->
     <script>
-        // نظام PWA للتثبيت
+        // نظام PWA محسّن ومضمون
+        console.log('🚀 بدء تحميل نظام PWA...');
+
         class PWAInstaller {
             constructor() {
                 this.deferredPrompt = null;
+                this.isAppInstalled = false;
                 this.init();
             }
 
             init() {
-                this.setupInstallPrompt();
+                console.log('🟢 تهيئة نظام PWA...');
+                this.checkManifest();
                 this.setupServiceWorker();
+                this.setupInstallPrompt();
                 this.checkInstallStatus();
-                this.setupOfflineDetection();
+                this.setupFallbackInstall();
+            }
+
+            checkManifest() {
+                // التحقق من وجود Manifest
+                const manifestLink = document.querySelector('link[rel="manifest"]');
+                if (!manifestLink) {
+                    console.error('❌ Manifest غير موجود');
+                    this.createFallbackManifest();
+                    return;
+                }
+
+                fetch(manifestLink.href)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Manifest غير قابل للتحميل');
+                        return response.json();
+                    })
+                    .then(manifest => {
+                        console.log('✅ Manifest محمل:', manifest.name);
+                        this.validateManifest(manifest);
+                    })
+                    .catch(error => {
+                        console.error('❌ خطأ في Manifest:', error);
+                        this.createFallbackManifest();
+                    });
+            }
+
+            createFallbackManifest() {
+                console.log('🔄 إنشاء Manifest احتياطي...');
+                const fallbackManifest = {
+                    name: "وسيل بلاي",
+                    short_name: "وسيل بلاي",
+                    description: "متجر التطبيقات العربي المجاني",
+                    start_url: "/",
+                    display: "standalone",
+                    background_color: "#4361ee",
+                    theme_color: "#4361ee",
+                    orientation: "portrait",
+                    icons: [{
+                        src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiM0MzYxZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iNDgiPvCfjIo8L3RleHQ+PC9zdmc+",
+                        sizes: "192x192",
+                        type: "image/svg+xml"
+                    }]
+                };
+
+                const manifestString = JSON.stringify(fallbackManifest);
+                const blob = new Blob([manifestString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('link');
+                link.rel = 'manifest';
+                link.href = url;
+                document.head.appendChild(link);
+                
+                console.log('✅ Manifest احتياطي تم إنشاؤه');
+            }
+
+            validateManifest(manifest) {
+                const requiredFields = ['name', 'short_name', 'icons'];
+                const missingFields = requiredFields.filter(field => !manifest[field]);
+                
+                if (missingFields.length > 0) {
+                    console.error('❌ حقول مفقودة في Manifest:', missingFields);
+                } else {
+                    console.log('✅ Manifest صالح');
+                }
             }
 
             setupServiceWorker() {
                 if ('serviceWorker' in navigator) {
                     navigator.serviceWorker.register('sw.js')
                         .then(registration => {
-                            console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                            console.log('✅ Service Worker مسجل:', registration.scope);
+                            
+                            // التحقق من حالة Service Worker
+                            if (registration.installing) {
+                                console.log('🔄 Service Worker جاري التثبيت...');
+                            } else if (registration.waiting) {
+                                console.log('✅ Service Worker بانتظار التفعيل');
+                            } else if (registration.active) {
+                                console.log('✅ Service Worker نشط');
+                            }
                         })
                         .catch(error => {
                             console.error('❌ فشل تسجيل Service Worker:', error);
+                            this.createFallbackServiceWorker();
                         });
+                } else {
+                    console.warn('⚠️ Service Worker غير مدعوم في هذا المتصفح');
                 }
+            }
+
+            createFallbackServiceWorker() {
+                console.log('🔄 استخدام Service Worker افتراضي...');
+                // سنتعامل بدون Service Worker كحل بديل
             }
 
             setupInstallPrompt() {
                 window.addEventListener('beforeinstallprompt', (e) => {
-                    console.log('✅ حدث beforeinstallprompt تم تفعيله');
+                    console.log('🎉 حدث beforeinstallprompt تم تشغيله!');
                     e.preventDefault();
                     this.deferredPrompt = e;
                     this.showInstallButton();
+                    
+                    // إظهار معلومات التصحيح
+                    this.showDebugInfo('تم تفعيل إمكانية التثبيت');
                 });
 
-                window.addEventListener('appinstalled', () => {
-                    console.log('✅ التطبيق تم تثبيته بنجاح');
+                window.addEventListener('appinstalled', (evt) => {
+                    console.log('✅ التطبيق تم تثبيته بنجاح!');
+                    this.isAppInstalled = true;
                     this.hideInstallButton();
-                    this.deferredPrompt = null;
+                    this.showDebugInfo('تم تثبيت التطبيق بنجاح');
                 });
+
+                // إذا لم يظهر الحدث خلال 5 ثوان، أظهر الزر يدوياً
+                setTimeout(() => {
+                    if (!this.deferredPrompt && !this.isAppInstalled) {
+                        console.log('⏰ لم يظهر حدث التثبيت، عرض الزر يدوياً');
+                        this.showInstallButton();
+                    }
+                }, 5000);
             }
 
             showInstallButton() {
@@ -302,10 +401,11 @@
                     return;
                 }
 
-                // إذا كان الزر موجوداً بالفعل، لا تنشئه مرة أخرى
                 if (document.getElementById('pwa-install-button')) {
                     return;
                 }
+
+                console.log('🔄 عرض زر التثبيت...');
 
                 const installBtn = document.createElement('button');
                 installBtn.id = 'pwa-install-button';
@@ -318,16 +418,16 @@
                 
                 installBtn.style.cssText = `
                     position: fixed;
-                    bottom: 100px;
-                    right: 20px;
+                    bottom: 120px;
+                    right: 15px;
                     background: linear-gradient(135deg, #4361ee, #3a56d4);
                     color: white;
                     border: none;
-                    padding: 12px 20px;
+                    padding: 14px 20px;
                     border-radius: 25px;
                     cursor: pointer;
                     z-index: 10000;
-                    box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
+                    box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
                     font-family: inherit;
                     font-weight: 600;
                     font-size: 14px;
@@ -336,13 +436,13 @@
                 `;
 
                 installBtn.addEventListener('mouseenter', () => {
-                    installBtn.style.transform = 'translateY(-2px)';
-                    installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.4)';
+                    installBtn.style.transform = 'translateY(-3px)';
+                    installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.6)';
                 });
 
                 installBtn.addEventListener('mouseleave', () => {
                     installBtn.style.transform = 'translateY(0)';
-                    installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.3)';
+                    installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.4)';
                 });
 
                 installBtn.addEventListener('click', () => {
@@ -350,11 +450,12 @@
                 });
 
                 document.body.appendChild(installBtn);
+                console.log('✅ زر التثبيت معروض');
 
-                // إخفاء تلقائي بعد 15 ثانية
+                // إخفاء تلقائي بعد 20 ثانية
                 setTimeout(() => {
                     this.hideInstallButton();
-                }, 15000);
+                }, 20000);
             }
 
             hideInstallButton() {
@@ -365,70 +466,143 @@
                     setTimeout(() => {
                         if (installBtn.parentNode) {
                             installBtn.parentNode.removeChild(installBtn);
+                            console.log('🔻 زر التثبيت مخفي');
                         }
                     }, 300);
                 }
             }
 
             async installApp() {
-                if (!this.deferredPrompt) {
-                    this.showMessage('❌ لا يمكن تثبيت التطبيق حالياً', 'error');
-                    return;
-                }
-
-                try {
-                    this.deferredPrompt.prompt();
-                    const { outcome } = await this.deferredPrompt.userChoice;
-                    
-                    if (outcome === 'accepted') {
-                        console.log('✅ المستخدم قبل التثبيت');
-                        this.showMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
-                        this.hideInstallButton();
-                    } else {
-                        console.log('❌ المستخدم رفض التثبيت');
-                        this.showMessage('⚠️ تم إلغاء التثبيت', 'warning');
+                if (this.deferredPrompt) {
+                    try {
+                        console.log('🔄 بدء عملية التثبيت...');
+                        this.deferredPrompt.prompt();
+                        const { outcome } = await this.deferredPrompt.userChoice;
+                        
+                        if (outcome === 'accepted') {
+                            console.log('✅ المستخدم قبل التثبيت');
+                            this.showMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
+                            this.isAppInstalled = true;
+                        } else {
+                            console.log('❌ المستخدم رفض التثبيت');
+                            this.showMessage('⚠️ تم إلغاء التثبيت', 'warning');
+                        }
+                        
+                        this.deferredPrompt = null;
+                    } catch (error) {
+                        console.error('❌ خطأ أثناء التثبيت:', error);
+                        this.showManualInstallGuide();
                     }
-                    
-                    this.deferredPrompt = null;
-                } catch (error) {
-                    console.error('❌ خطأ أثناء التثبيت:', error);
-                    this.showMessage('❌ حدث خطأ أثناء التثبيت', 'error');
+                } else {
+                    console.log('🔍 deferredPrompt غير متوفر، عرض دليل التثبيت اليدوي');
+                    this.showManualInstallGuide();
                 }
+            }
+
+            showManualInstallGuide() {
+                const guide = `
+                    <div style="text-align: center; padding: 20px;">
+                        <h3>📱 كيفية تثبيت التطبيق</h3>
+                        <p>1. اضغط على <strong>النقاط الثلاث</strong> أعلى المتصفح</p>
+                        <p>2. اختر <strong>"Add to Home Screen"</strong> أو <strong>"تثبيت التطبيق"</strong></p>
+                        <p>3. اضغط <strong>"Add"</strong> أو <strong>"تثبيت"</strong></p>
+                    </div>
+                `;
+                
+                this.showMessage(guide, 'info');
             }
 
             isInstalled() {
-                return window.matchMedia('(display-mode: standalone)').matches;
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+                const isInWebApp = window.navigator.standalone;
+                
+                if (isStandalone || isInWebApp) {
+                    console.log('✅ التطبيق يعمل في وضع المثبت');
+                    this.isAppInstalled = true;
+                    return true;
+                }
+                return false;
             }
 
             checkInstallStatus() {
+                console.log('🔍 التحقق من حالة التثبيت...');
+                console.log('- display-mode: standalone:', window.matchMedia('(display-mode: standalone)').matches);
+                console.log('- navigator.standalone:', window.navigator.standalone);
+                console.log('- isAppInstalled:', this.isAppInstalled);
+                
                 if (this.isInstalled()) {
-                    console.log('🟢 التطبيق يعمل في وضع المثبت');
-                } else {
-                    console.log('🔵 التطبيق يعمل في وضع المتصفح');
+                    this.hideInstallButton();
                 }
             }
 
-            setupOfflineDetection() {
-                window.addEventListener('online', () => {
-                    this.showMessage('🟢 عودة الاتصال بالإنترنت', 'success');
-                });
+            setupFallbackInstall() {
+                // زر تثبيت يدوي إضافي
+                setTimeout(() => {
+                    if (!this.isAppInstalled && !this.deferredPrompt) {
+                        console.log('🔄 إظهار خيار التثبيت اليدوي');
+                        this.showManualInstallOption();
+                    }
+                }, 8000);
+            }
 
-                window.addEventListener('offline', () => {
-                    this.showMessage('🔴 أنت غير متصل بالإنترنت', 'error');
-                });
+            showManualInstallOption() {
+                if (document.getElementById('manual-install-btn')) return;
+
+                const manualBtn = document.createElement('button');
+                manualBtn.id = 'manual-install-btn';
+                manualBtn.innerHTML = '📋 كيفية التثبيت';
+                manualBtn.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    right: 15px;
+                    background: #f59e0b;
+                    color: white;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    z-index: 9999;
+                    font-size: 12px;
+                    font-weight: 600;
+                `;
+
+                manualBtn.onclick = () => {
+                    this.showManualInstallGuide();
+                };
+
+                document.body.appendChild(manualBtn);
+            }
+
+            showDebugInfo(message) {
+                console.log('🔧 تصحيح:', message);
+                
+                // يمكنك إلغاء التعليق لعرض المعلومات للمستخدم
+                /*
+                const debugDiv = document.createElement('div');
+                debugDiv.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(0,0,0,0.8);
+                    color: white;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-size: 12px;
+                    z-index: 10000;
+                `;
+                debugDiv.textContent = message;
+                document.body.appendChild(debugDiv);
+                setTimeout(() => debugDiv.remove(), 3000);
+                */
             }
 
             showMessage(text, type) {
-                // إزالة أي رسائل سابقة
-                const existingMsg = document.getElementById('pwa-message');
-                if (existingMsg) existingMsg.remove();
-
                 const message = document.createElement('div');
-                message.id = 'pwa-message';
                 message.innerHTML = text;
                 
                 const bgColor = type === 'success' ? '#10b981' : 
-                               type === 'error' ? '#ef4444' : '#f59e0b';
+                               type === 'error' ? '#ef4444' : 
+                               type === 'warning' ? '#f59e0b' : '#3b82f6';
                 
                 message.style.cssText = `
                     position: fixed;
@@ -436,10 +610,11 @@
                     right: 20px;
                     background: ${bgColor};
                     color: white;
-                    padding: 12px 20px;
+                    padding: 15px 20px;
                     border-radius: 10px;
                     z-index: 10001;
                     font-weight: 500;
+                    max-width: 300px;
                     animation: slideInRight 0.3s ease;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                 `;
@@ -451,102 +626,68 @@
                     setTimeout(() => {
                         if (message.parentNode) message.remove();
                     }, 300);
-                }, 3000);
+                }, type === 'info' ? 5000 : 3000);
             }
         }
 
-        // إدارة واجهة المستخدم الأساسية
+        // إضافة الأنيميشن
+        const pwaStyles = document.createElement('style');
+        pwaStyles.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(pwaStyles);
+
+        // بدء النظام عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("🚀 بدء تحميل وسيل بلاي...");
-
-            // إضافة أنيميشن للرسائل
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideInRight {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // بدء نظام PWA
+            console.log('🎯 بدء نظام PWA...');
             window.pwaInstaller = new PWAInstaller();
 
-            // إدارة شريط البحث
-            document.getElementById('searchIconTop').addEventListener('click', function() {
-                document.getElementById('searchModal').style.display = 'block';
-            });
-
-            document.getElementById('bottomSearchBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('searchModal').style.display = 'block';
-            });
-
-            // إغلاق النوافذ المنبثقة
-            document.querySelectorAll('.close').forEach(function(closeBtn) {
-                closeBtn.addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
-                });
-            });
-
-            // إغلاق النوافذ عند النقر خارجها
-            window.addEventListener('click', function(e) {
-                if (e.target.classList.contains('modal')) {
-                    e.target.style.display = 'none';
-                }
-            });
-
-            // البحث عند الضغط على Enter
-            document.getElementById('searchInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    performSearch();
-                }
-            });
-
-            // التنقل في الشريط السفلي
-            document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelectorAll('.bottom-nav-item').forEach(function(i) {
-                        i.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    const target = this.getAttribute('href');
-                    if (target === '#games') {
-                        filterApps('games');
-                    } else if (target === '#apps') {
-                        filterApps('all');
-                    } else if (target === '#search') {
-                        document.getElementById('searchModal').style.display = 'block';
-                    }
-                });
-            });
-
-            // التحقق من Manifest
-            fetch('manifest.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Manifest غير موجود');
-                    return response.json();
-                })
-                .then(manifest => {
-                    console.log('✅ Manifest محمل:', manifest.name);
-                })
-                .catch(error => {
-                    console.warn('⚠️ Manifest غير متوفر:', error);
-                });
-
-            console.log("✅ تم تحميل الصفحة بالكامل");
+            // إضافة أزرار تحكم للتطوير (يمكن إزالتها لاحقاً)
+            const devControls = document.createElement('div');
+            devControls.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                z-index: 10000;
+            `;
+            devControls.innerHTML = `
+                <div>PWA Controls:</div>
+                <button onclick="pwaInstaller.showInstallButton()" style="margin:2px; padding:5px;">Show Install</button>
+                <button onclick="console.log(pwaInstaller)" style="margin:2px; padding:5px;">Debug</button>
+            `;
+            document.body.appendChild(devControls);
         });
 
-        // جعل الدوال متاحة عالمياً
-        window.performSearch = performSearch;
-        window.filterApps = filterApps;
-        window.displaySpecialSection = displaySpecialSection;
+        // جعل الدوال متاحة عالمياً للتصحيح
+        window.forceShowInstall = function() {
+            if (window.pwaInstaller) {
+                window.pwaInstaller.showInstallButton();
+            }
+        };
+
+        // تشخيص تلقائي
+        setTimeout(() => {
+            console.log('=== تشخيص PWA ===');
+            console.log('deferredPrompt:', window.pwaInstaller?.deferredPrompt);
+            console.log('isInstalled:', window.pwaInstaller?.isInstalled());
+            console.log('Service Worker:', 'serviceWorker' in navigator);
+            console.log('Manifest:', !!document.querySelector('link[rel="manifest"]'));
+        }, 3000);
+
     </script>
+</body>
+</html>
 </body>
 </html>
