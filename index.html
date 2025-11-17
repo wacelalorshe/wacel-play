@@ -46,6 +46,45 @@
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+        
+        /* تنسيقات إضافية */
+        .pwa-install-btn {
+            position: fixed;
+            bottom: 120px;
+            right: 15px;
+            background: linear-gradient(135deg, #4361ee, #3a56d4);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+        }
+        
+        .pwa-install-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(67, 97, 238, 0.6);
+        }
+        
+        .debug-panel {
+            position: fixed;
+            top: 80px;
+            right: 10px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            max-width: 320px;
+            border: 2px solid #4361ee;
+        }
     </style>
 </head>
 <body>
@@ -257,491 +296,330 @@
         </div>
     </div>
 
-    <!-- زر التثبيت (سيتم إضافته ديناميكياً) -->
-    <div id="pwa-install-container"></div>
-
-    <!-- لوحة تصحيح PWA -->
-    <div id="pwa-debug-panel"></div>
-
     <!-- تحميل ملفات JavaScript -->
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- نظام PWA و Eruda -->
+    <!-- نظام PWA المحسن مع إصلاح Prompt -->
     <script>
-        // نظام PWA المحسن مع إصلاح الأخطاء
-        let pwaInstaller = null;
+        // نظام PWA مبسط وخالي من الأخطاء
+        console.log('🚀 بدء تحميل نظام PWA...');
 
-        class PWAInstaller {
-            constructor() {
-                this.deferredPrompt = null;
-                this.isAppInstalled = false;
-                this.debugMode = true;
-                this.init();
-            }
+        // متغيرات عامة
+        let deferredPrompt = null;
+        let isAppInstalled = false;
 
-            init() {
-                console.log('🟢 تهيئة نظام PWA...');
-                this.setupEruda();
-                this.createDebugPanel();
-                this.checkManifest();
-                this.setupServiceWorker();
-                this.setupInstallPrompt();
-                this.checkInstallStatus();
-                this.setupFallbackInstall();
-                this.showDebugInfo('System initialized');
-            }
+        // التحقق من شروط PWA الأساسية
+        function checkPWARequirements() {
+            console.log('🔍 التحقق من متطلبات PWA:');
+            console.log('- HTTPS:', window.location.protocol === 'https:');
+            console.log('- Service Worker:', 'serviceWorker' in navigator);
+            console.log('- Manifest:', !!document.querySelector('link[rel="manifest"]'));
+            console.log('- قبل التثبيت:', 'onbeforeinstallprompt' in window);
+            
+            return {
+                https: window.location.protocol === 'https:',
+                serviceWorker: 'serviceWorker' in navigator,
+                manifest: !!document.querySelector('link[rel="manifest"]'),
+                beforeInstallPrompt: 'onbeforeinstallprompt' in window
+            };
+        }
 
-            setupEruda() {
-                // تحميل Eruda ديناميكياً لتجنب الأخطاء
-                if (typeof eruda === 'undefined') {
-                    console.log('🔄 جاري تحميل Eruda...');
-                    const script = document.createElement('script');
-                    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-                    script.onload = () => {
-                        eruda.init();
-                        this.setupErudaButton();
-                        console.log('✅ Eruda loaded successfully');
-                    };
-                    script.onerror = () => {
-                        console.log('❌ Failed to load Eruda, continuing without debug tools');
-                    };
-                    document.head.appendChild(script);
-                } else {
-                    this.setupErudaButton();
-                }
-            }
-
-            setupErudaButton() {
-                const erudaBtn = document.createElement('button');
-                erudaBtn.innerHTML = '🔧';
-                erudaBtn.style.cssText = `
-                    position: fixed;
-                    bottom: 20px;
-                    left: 20px;
-                    width: 50px;
-                    height: 50px;
-                    background: #4361ee;
-                    color: white;
-                    border: none;
-                    border-radius: 50%;
-                    font-size: 20px;
-                    cursor: pointer;
-                    z-index: 10000;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                `;
-                erudaBtn.addEventListener('click', () => {
-                    if (typeof eruda !== 'undefined') {
-                        eruda.show();
-                    } else {
-                        this.showMessage('❌ Eruda غير محملة', 'error');
-                    }
-                });
-                document.body.appendChild(erudaBtn);
-            }
-
-            createDebugPanel() {
-                if (!this.debugMode) return;
-
-                const debugPanel = document.createElement('div');
-                debugPanel.id = 'pwa-debug-panel';
-                debugPanel.innerHTML = `
-                    <div style="background: rgba(0,0,0,0.85); color: white; padding: 12px; border-radius: 12px; font-size: 12px; max-width: 320px; border: 2px solid #4361ee;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 8px;">
-                            <strong>🔧 تصحيح PWA المباشر</strong>
-                            <div>
-                                <button id="toggleDebugBtn" style="margin-right: 5px; padding: 3px 8px; background: #666; color: white; border: none; border-radius: 3px; font-size: 10px;">إخفاء</button>
-                                <button id="closeDebugBtn" style="padding: 3px 8px; background: #ef4444; color: white; border: none; border-radius: 3px; font-size: 10px;">✕</button>
-                            </div>
-                        </div>
-                        <div id="debug-content" style="line-height: 1.6;">
-                            <div>⏳ جاري التحميل...</div>
-                        </div>
-                        <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                            <button id="forceInstallBtn" style="padding: 6px; background: #4361ee; color: white; border: none; border-radius: 6px; font-size: 11px;">إظهار التثبيت</button>
-                            <button id="checkStatusBtn" style="padding: 6px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص الحالة</button>
-                            <button id="testManifestBtn" style="padding: 6px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص Manifest</button>
-                            <button id="showManualBtn" style="padding: 6px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 11px;">دليل التثبيت</button>
-                        </div>
-                    </div>
-                `;
-                
-                debugPanel.style.cssText = `
-                    position: fixed;
-                    top: 80px;
-                    right: 10px;
-                    z-index: 9999;
-                `;
-
-                document.body.appendChild(debugPanel);
-                this.attachDebugEvents();
-            }
-
-            attachDebugEvents() {
-                // استخدام setTimeout لضمان تحميل العناصر أولاً
-                setTimeout(() => {
-                    const toggleBtn = document.getElementById('toggleDebugBtn');
-                    const closeBtn = document.getElementById('closeDebugBtn');
-                    const forceInstallBtn = document.getElementById('forceInstallBtn');
-                    const checkStatusBtn = document.getElementById('checkStatusBtn');
-                    const testManifestBtn = document.getElementById('testManifestBtn');
-                    const showManualBtn = document.getElementById('showManualBtn');
-
-                    if (toggleBtn) toggleBtn.addEventListener('click', () => this.toggleDebug());
-                    if (closeBtn) closeBtn.addEventListener('click', () => this.closeDebug());
-                    if (forceInstallBtn) forceInstallBtn.addEventListener('click', () => this.forceShowInstall());
-                    if (checkStatusBtn) checkStatusBtn.addEventListener('click', () => this.checkStatus());
-                    if (testManifestBtn) testManifestBtn.addEventListener('click', () => this.testManifest());
-                    if (showManualBtn) showManualBtn.addEventListener('click', () => this.showManualGuide());
-                }, 100);
-            }
-
-            toggleDebug() {
-                const content = document.getElementById('debug-content');
-                if (content) {
-                    if (content.style.display === 'none') {
-                        content.style.display = 'block';
-                        this.showDebugInfo('تم إظهار لوحة التصحيح');
-                    } else {
-                        content.style.display = 'none';
-                    }
-                }
-            }
-
-            closeDebug() {
-                const panel = document.getElementById('pwa-debug-panel');
-                if (panel) {
-                    panel.remove();
-                }
-            }
-
-            updateDebugInfo(content) {
-                if (!this.debugMode) return;
-                
-                const debugContent = document.getElementById('debug-content');
-                if (debugContent) {
-                    debugContent.innerHTML = content;
-                }
-            }
-
-            showDebugInfo(message) {
-                console.log('🔧 ' + message);
-                
-                if (this.debugMode) {
-                    const timestamp = new Date().toLocaleTimeString();
-                    const status = `
-                        <div style="color: #60a5fa;">🕒 ${timestamp}</div>
-                        <div style="margin: 5px 0; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 5px;">${message}</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 8px;">
-                            <span>📱 التثبيت:</span> <span style="color: ${this.isAppInstalled ? '#10b981' : '#ef4444'}">${this.isAppInstalled ? '✅' : '❌'}</span>
-                            <span>🎯 Prompt:</span> <span style="color: ${this.deferredPrompt ? '#10b981' : '#ef4444'}">${this.deferredPrompt ? '✅' : '❌'}</span>
-                            <span>🔧 Service Worker:</span> <span style="color: ${'serviceWorker' in navigator ? '#10b981' : '#ef4444'}">${'serviceWorker' in navigator ? '✅' : '❌'}</span>
-                            <span>📄 Manifest:</span> <span style="color: ${document.querySelector('link[rel="manifest"]') ? '#10b981' : '#ef4444'}">${document.querySelector('link[rel="manifest"]') ? '✅' : '❌'}</span>
-                        </div>
-                    `;
-                    this.updateDebugInfo(status);
-                }
-            }
-
-            checkManifest() {
-                const manifestLink = document.querySelector('link[rel="manifest"]');
-                if (!manifestLink) {
-                    this.showDebugInfo('❌ Manifest غير موجود');
-                    this.createFallbackManifest();
-                    return;
-                }
-
-                this.showDebugInfo('🔍 جاري فحص Manifest...');
-                
-                fetch(manifestLink.href)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Manifest غير قابل للتحميل');
-                        return response.json();
-                    })
-                    .then(manifest => {
-                        this.showDebugInfo('✅ Manifest محمل: ' + manifest.name);
-                        console.log('Manifest details:', manifest);
+        // تسجيل Service Worker
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker مسجل:', registration.scope);
                     })
                     .catch(error => {
-                        this.showDebugInfo('❌ خطأ في Manifest: ' + error.message);
-                        this.createFallbackManifest();
+                        console.log('⚠️ Service Worker غير مسجل:', error);
                     });
-            }
-
-            createFallbackManifest() {
-                this.showDebugInfo('🔄 إنشاء Manifest احتياطي...');
-                
-                const fallbackManifest = {
-                    name: "وسيل بلاي",
-                    short_name: "وسيل بلاي",
-                    description: "متجر التطبيقات العربي المجاني",
-                    start_url: "/",
-                    display: "standalone",
-                    background_color: "#4361ee",
-                    theme_color: "#4361ee",
-                    orientation: "portrait",
-                    icons: [{
-                        src: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIGZpbGw9IiM0MzYxZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iNDgiPvCfjIo8L3RleHQ+PC9zdmc+",
-                        sizes: "192x192",
-                        type: "image/svg+xml"
-                    }]
-                };
-
-                const manifestString = JSON.stringify(fallbackManifest);
-                const blob = new Blob([manifestString], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const link = document.createElement('link');
-                link.rel = 'manifest';
-                link.href = url;
-                document.head.appendChild(link);
-                
-                this.showDebugInfo('✅ Manifest احتياطي تم إنشاؤه');
-            }
-
-            setupServiceWorker() {
-                if ('serviceWorker' in navigator) {
-                    this.showDebugInfo('🔍 جاري تسجيل Service Worker...');
-                    
-                    navigator.serviceWorker.register('sw.js')
-                        .then(registration => {
-                            this.showDebugInfo('✅ Service Worker مسجل: ' + registration.scope);
-                        })
-                        .catch(error => {
-                            this.showDebugInfo('❌ فشل تسجيل Service Worker: ' + error.message);
-                        });
-                } else {
-                    this.showDebugInfo('⚠️ Service Worker غير مدعوم في هذا المتصفح');
-                }
-            }
-
-            setupInstallPrompt() {
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    this.showDebugInfo('🎉 حدث beforeinstallprompt تم تشغيله!');
-                    e.preventDefault();
-                    this.deferredPrompt = e;
-                    this.showInstallButton();
-                });
-
-                window.addEventListener('appinstalled', (evt) => {
-                    this.showDebugInfo('✅ التطبيق تم تثبيته بنجاح!');
-                    this.isAppInstalled = true;
-                    this.hideInstallButton();
-                    this.showMessage('🎉 تم تثبيت التطبيق بنجاح!', 'success');
-                });
-
-                setTimeout(() => {
-                    if (!this.deferredPrompt && !this.isAppInstalled) {
-                        this.showDebugInfo('⏰ لم يظهر حدث التثبيت، عرض الزر يدوياً');
-                        this.showInstallButton();
-                    }
-                }, 3000);
-            }
-
-            showInstallButton() {
-                if (this.isInstalled()) {
-                    this.showDebugInfo('✅ التطبيق مثبت بالفعل');
-                    return;
-                }
-
-                if (document.getElementById('pwa-install-button')) {
-                    return;
-                }
-
-                this.showDebugInfo('🔄 عرض زر التثبيت...');
-
-                const installBtn = document.createElement('button');
-                installBtn.id = 'pwa-install-button';
-                installBtn.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                        <i class="fas fa-download" style="font-size: 16px;"></i>
-                        <span>تثبيت التطبيق</span>
-                    </div>
-                `;
-                
-                installBtn.style.cssText = `
-                    position: fixed;
-                    bottom: 120px;
-                    right: 15px;
-                    background: linear-gradient(135deg, #4361ee, #3a56d4);
-                    color: white;
-                    border: none;
-                    padding: 14px 20px;
-                    border-radius: 25px;
-                    cursor: pointer;
-                    z-index: 10000;
-                    box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
-                    font-family: inherit;
-                    font-weight: 600;
-                    font-size: 14px;
-                    transition: all 0.3s ease;
-                    border: 2px solid white;
-                `;
-
-                installBtn.addEventListener('click', () => {
-                    this.installApp();
-                });
-
-                document.body.appendChild(installBtn);
-                this.showDebugInfo('✅ زر التثبيت معروض');
-
-                setTimeout(() => {
-                    this.hideInstallButton();
-                }, 25000);
-            }
-
-            hideInstallButton() {
-                const installBtn = document.getElementById('pwa-install-button');
-                if (installBtn) {
-                    installBtn.style.opacity = '0';
-                    installBtn.style.transform = 'translateY(10px)';
-                    setTimeout(() => {
-                        if (installBtn.parentNode) {
-                            installBtn.parentNode.removeChild(installBtn);
-                            this.showDebugInfo('🔻 زر التثبيت مخفي');
-                        }
-                    }, 300);
-                }
-            }
-
-            async installApp() {
-                if (this.deferredPrompt) {
-                    try {
-                        this.showDebugInfo('🔄 بدء عملية التثبيت...');
-                        this.deferredPrompt.prompt();
-                        const { outcome } = await this.deferredPrompt.userChoice;
-                        
-                        if (outcome === 'accepted') {
-                            this.showDebugInfo('✅ المستخدم قبل التثبيت');
-                            this.showMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
-                            this.isAppInstalled = true;
-                        } else {
-                            this.showDebugInfo('❌ المستخدم رفض التثبيت');
-                            this.showMessage('⚠️ تم إلغاء التثبيت', 'warning');
-                        }
-                        
-                        this.deferredPrompt = null;
-                    } catch (error) {
-                        this.showDebugInfo('❌ خطأ أثناء التثبيت: ' + error.message);
-                        this.showManualInstallGuide();
-                    }
-                } else {
-                    this.showDebugInfo('🔍 deferredPrompt غير متوفر، عرض دليل التثبيت اليدوي');
-                    this.showManualInstallGuide();
-                }
-            }
-
-            showManualInstallGuide() {
-                const guide = `
-                    <div style="text-align: center; padding: 25px; max-width: 320px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                        <h3 style="margin-bottom: 20px; color: #333;">📱 كيفية تثبيت التطبيق</h3>
-                        <div style="text-align: right; line-height: 2.2; color: #555; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</span>
-                                <span>اضغط على <strong>النقاط الثلاث</strong> ⋮ أعلى المتصفح</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span>
-                                <span>اختر <strong>"Add to Home Screen"</strong></span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span>
-                                <span>اضغط <strong>"Add"</strong> أو <strong>"تثبيت"</strong></span>
-                            </div>
-                        </div>
-                        <button onclick="pwaInstaller.hideMessage()" style="padding: 12px 30px; background: #4361ee; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">حسناً</button>
-                    </div>
-                `;
-                this.showMessage(guide, 'manual');
-            }
-
-            showManualGuide() {
-                this.showManualInstallGuide();
-            }
-
-            showMessage(text, type) {
-                this.hideMessage();
-
-                const message = document.createElement('div');
-                message.innerHTML = text;
-                message.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    z-index: 10002;
-                    animation: slideInRight 0.3s ease;
-                `;
-                document.body.appendChild(message);
-                this.currentMessage = message;
-            }
-
-            hideMessage() {
-                if (this.currentMessage && this.currentMessage.parentNode) {
-                    this.currentMessage.parentNode.removeChild(this.currentMessage);
-                    this.currentMessage = null;
-                }
-            }
-
-            forceShowInstall() {
-                this.showInstallButton();
-                this.showDebugInfo('🔄 إظهار زر التثبيت يدوياً');
-            }
-
-            checkStatus() {
-                const status = {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform,
-                    cookieEnabled: navigator.cookieEnabled,
-                    onLine: navigator.onLine,
-                    serviceWorker: 'serviceWorker' in navigator,
-                    manifest: !!document.querySelector('link[rel="manifest"]'),
-                    installed: this.isInstalled(),
-                    deferredPrompt: !!this.deferredPrompt
-                };
-                
-                this.showDebugInfo('🔍 فحص الحالة التفصيلي');
-                console.log('PWA Status Check:', status);
-            }
-
-            testManifest() {
-                this.showDebugInfo('🔍 فحص Manifest تفصيلي');
-                this.checkManifest();
-            }
-
-            isInstalled() {
-                const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-                const isInWebApp = window.navigator.standalone;
-                
-                if (isStandalone || isInWebApp) {
-                    this.isAppInstalled = true;
-                    return true;
-                }
-                return false;
-            }
-
-            setupFallbackInstall() {
-                setTimeout(() => {
-                    if (!this.isAppInstalled && !this.deferredPrompt) {
-                        this.showDebugInfo('🔄 إظهار خيار التثبيت اليدوي');
-                        this.showInstallButton();
-                    }
-                }, 8000);
             }
         }
 
-        // بدء النظام عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 بدء نظام PWA...');
+        // التحقق من حالة التثبيت
+        function checkInstallStatus() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                console.log('✅ التطبيق مثبت بالفعل');
+                isAppInstalled = true;
+                return true;
+            }
+            return false;
+        }
+
+        // إظهار زر التثبيت
+        function showInstallButton() {
+            if (checkInstallStatus()) return;
             
-            // تعريف pwaInstaller في النطاق العام
-            window.pwaInstaller = new PWAInstaller();
+            if (document.getElementById('pwa-install-button')) return;
+
+            console.log('🔄 عرض زر التثبيت...');
+
+            const installBtn = document.createElement('button');
+            installBtn.id = 'pwa-install-button';
+            installBtn.className = 'pwa-install-btn';
+            installBtn.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                    <i class="fas fa-download" style="font-size: 16px;"></i>
+                    <span>تثبيت التطبيق</span>
+                </div>
+            `;
+
+            installBtn.addEventListener('click', handleInstallClick);
+            document.body.appendChild(installBtn);
+            
+            // إخفاء تلقائي بعد 30 ثانية
+            setTimeout(() => {
+                hideInstallButton();
+            }, 30000);
+        }
+
+        // إخفاء زر التثبيت
+        function hideInstallButton() {
+            const installBtn = document.getElementById('pwa-install-button');
+            if (installBtn) {
+                installBtn.style.opacity = '0';
+                installBtn.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    if (installBtn.parentNode) {
+                        installBtn.parentNode.removeChild(installBtn);
+                        console.log('🔻 زر التثبيت مخفي');
+                    }
+                }, 300);
+            }
+        }
+
+        // التعامل مع النقر على زر التثبيت
+        async function handleInstallClick() {
+            if (deferredPrompt) {
+                try {
+                    console.log('🔄 بدء عملية التثبيت...');
+                    
+                    // عرض prompt التثبيت
+                    deferredPrompt.prompt();
+                    
+                    // انتظار اختيار المستخدم
+                    const choiceResult = await deferredPrompt.userChoice;
+                    console.log('🎯 اختيار المستخدم:', choiceResult);
+                    
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('✅ المستخدم قبل التثبيت');
+                        showMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
+                        isAppInstalled = true;
+                        hideInstallButton();
+                    } else {
+                        console.log('❌ المستخدم رفض التثبيت');
+                        showMessage('⚠️ تم إلغاء التثبيت', 'warning');
+                    }
+                    
+                    // مسح deferredPrompt بعد الاستخدام
+                    deferredPrompt = null;
+                    
+                } catch (error) {
+                    console.error('❌ خطأ أثناء التثبيت:', error);
+                    showManualInstallGuide();
+                }
+            } else {
+                console.log('🔍 deferredPrompt غير متوفر');
+                showManualInstallGuide();
+            }
+        }
+
+        // إظهار دليل التثبيت اليدوي
+        function showManualInstallGuide() {
+            const guide = `
+                <div style="text-align: center; padding: 25px; max-width: 320px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <h3 style="margin-bottom: 20px; color: #333;">📱 كيفية تثبيت التطبيق</h3>
+                    <div style="text-align: right; line-height: 2.2; color: #555; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</span>
+                            <span>اضغط على <strong>النقاط الثلاث</strong> ⋮ أعلى المتصفح</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span>
+                            <span>اختر <strong>"Add to Home Screen"</strong></span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span>
+                            <span>اضغط <strong>"Add"</strong> أو <strong>"تثبيت"</strong></span>
+                        </div>
+                    </div>
+                    <button onclick="hideMessage()" style="padding: 12px 30px; background: #4361ee; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">حسناً</button>
+                </div>
+            `;
+            showMessage(guide);
+        }
+
+        // إظهار رسالة للمستخدم
+        function showMessage(content, type = 'info') {
+            // إخفاء أي رسائل سابقة
+            hideMessage();
+
+            const message = document.createElement('div');
+            message.innerHTML = content;
+            
+            const bgColor = type === 'success' ? '#10b981' : 
+                           type === 'error' ? '#ef4444' : 
+                           type === 'warning' ? '#f59e0b' : 'white';
+            
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: ${bgColor};
+                color: ${type === 'info' ? '#333' : 'white'};
+                padding: 20px;
+                border-radius: 15px;
+                z-index: 10002;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 90%;
+                animation: slideInRight 0.3s ease;
+            `;
+
+            document.body.appendChild(message);
+            window.currentMessage = message;
+        }
+
+        // إخفاء الرسالة
+        function hideMessage() {
+            if (window.currentMessage && window.currentMessage.parentNode) {
+                window.currentMessage.parentNode.removeChild(window.currentMessage);
+                window.currentMessage = null;
+            }
+        }
+
+        // إنشاء لوحة تصحيح
+        function createDebugPanel() {
+            const debugPanel = document.createElement('div');
+            debugPanel.className = 'debug-panel';
+            debugPanel.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 8px;">
+                    <strong>🔧 حالة PWA</strong>
+                    <button onclick="toggleDebugPanel()" style="padding: 3px 8px; background: #666; color: white; border: none; border-radius: 3px; font-size: 10px;">إخفاء</button>
+                </div>
+                <div id="debug-status">
+                    <div>⏳ جاري التحميل...</div>
+                </div>
+                <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                    <button onclick="forceShowInstall()" style="padding: 6px; background: #4361ee; color: white; border: none; border-radius: 6px; font-size: 11px;">إظهار التثبيت</button>
+                    <button onclick="checkPWAStatus()" style="padding: 6px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص الحالة</button>
+                </div>
+            `;
+
+            document.body.appendChild(debugPanel);
+            updateDebugStatus();
+        }
+
+        // تحديث حالة التصحيح
+        function updateDebugStatus() {
+            const statusElement = document.getElementById('debug-status');
+            if (!statusElement) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const status = `
+                <div style="color: #60a5fa;">🕒 ${timestamp}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 8px;">
+                    <span>📱 التثبيت:</span> <span style="color: ${isAppInstalled ? '#10b981' : '#ef4444'}">${isAppInstalled ? '✅' : '❌'}</span>
+                    <span>🎯 Prompt:</span> <span style="color: ${deferredPrompt ? '#10b981' : '#ef4444'}">${deferredPrompt ? '✅' : '❌'}</span>
+                    <span>🔧 Service Worker:</span> <span style="color: ${'serviceWorker' in navigator ? '#10b981' : '#ef4444'}">${'serviceWorker' in navigator ? '✅' : '❌'}</span>
+                    <span>📄 Manifest:</span> <span style="color: ${document.querySelector('link[rel="manifest"]') ? '#10b981' : '#ef4444'}">${document.querySelector('link[rel="manifest"]') ? '✅' : '❌'}</span>
+                </div>
+            `;
+            
+            statusElement.innerHTML = status;
+        }
+
+        // تبديل عرض لوحة التصحيح
+        function toggleDebugPanel() {
+            const panel = document.querySelector('.debug-panel');
+            if (panel) {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // إظهار زر التثبيت يدوياً
+        function forceShowInstall() {
+            showInstallButton();
+            updateDebugStatus();
+        }
+
+        // فحص حالة PWA
+        function checkPWAStatus() {
+            const requirements = checkPWARequirements();
+            console.log('🔍 فحص حالة PWA:', requirements);
+            updateDebugStatus();
+            
+            if (!requirements.https) {
+                showMessage('❌ الموقع لا يعمل على HTTPS', 'error');
+            }
+            if (!requirements.manifest) {
+                showMessage('❌ ملف Manifest غير موجود', 'error');
+            }
+        }
+
+        // تهيئة النظام عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 بدء تهيئة نظام PWA...');
+            
+            // التحقق من المتطلبات الأساسية
+            const requirements = checkPWARequirements();
+            
+            // تسجيل Service Worker
+            registerServiceWorker();
+            
+            // التحقق من حالة التثبيت
+            checkInstallStatus();
+            
+            // إنشاء لوحة التصحيح
+            createDebugPanel();
+            
+            // الاستماع لحدث beforeinstallprompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('🎉 حدث beforeinstallprompt تم تشغيله!');
+                
+                // منع المتصفح من عرض prompt التلقائي
+                e.preventDefault();
+                
+                // حفظ event للاستخدام لاحقاً
+                deferredPrompt = e;
+                
+                // عرض زر التثبيت
+                showInstallButton();
+                
+                // تحديث حالة التصحيح
+                updateDebugStatus();
+            });
+
+            // الاستماع لحدث appinstalled
+            window.addEventListener('appinstalled', (evt) => {
+                console.log('✅ التطبيق تم تثبيته بنجاح!');
+                isAppInstalled = true;
+                hideInstallButton();
+                updateDebugStatus();
+            });
+
+            // إذا لم يظهر حدث التثبيت خلال 5 ثوان، عرض الزر يدوياً
+            setTimeout(() => {
+                if (!deferredPrompt && !isAppInstalled) {
+                    console.log('⏰ عرض زر التثبيت يدوياً');
+                    showInstallButton();
+                    updateDebugStatus();
+                }
+            }, 5000);
 
             // إدارة واجهة المستخدم الأساسية
+            setupUIEvents();
+            
+            console.log("✅ تم تحميل الصفحة بالكامل");
+        });
+
+        // إعداد أحداث واجهة المستخدم
+        function setupUIEvents() {
+            // أحداث البحث
             document.getElementById('searchIconTop').addEventListener('click', function() {
                 document.getElementById('searchModal').style.display = 'block';
             });
@@ -754,21 +632,26 @@
             document.getElementById('searchButton').addEventListener('click', function() {
                 if (typeof performSearch === 'function') {
                     performSearch();
+                } else {
+                    console.log('🔍 وظيفة البحث غير متوفرة');
                 }
             });
 
+            // إغلاق النوافذ المنبثقة
             document.querySelectorAll('.close').forEach(function(closeBtn) {
                 closeBtn.addEventListener('click', function() {
                     this.closest('.modal').style.display = 'none';
                 });
             });
 
+            // إغلاق النوافذ عند النقر خارجها
             window.addEventListener('click', function(e) {
                 if (e.target.classList.contains('modal')) {
                     e.target.style.display = 'none';
                 }
             });
 
+            // البحث عند الضغط على Enter
             document.getElementById('searchInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     if (typeof performSearch === 'function') {
@@ -777,7 +660,7 @@
                 }
             });
 
-            // إضافة أحداث للفئات
+            // أحداث الفئات
             document.querySelectorAll('.category-filter').forEach(function(button) {
                 button.addEventListener('click', function() {
                     const category = this.getAttribute('data-category');
@@ -787,7 +670,7 @@
                 });
             });
 
-            // إضافة أحداث لألسنة الأقسام
+            // أحداث الأقسام الخاصة
             document.querySelectorAll('.section-tab').forEach(function(tab) {
                 tab.addEventListener('click', function() {
                     const section = this.getAttribute('data-section');
@@ -797,6 +680,7 @@
                 });
             });
 
+            // التنقل في الشريط السفلي
             document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -819,22 +703,13 @@
                     }
                 });
             });
+        }
 
-            console.log("✅ تم تحميل الصفحة بالكامل");
-        });
-
-        // جعل الدوال متاحة عالمياً
-        window.performSearch = typeof performSearch !== 'undefined' ? performSearch : function() {
-            console.log('🔍 وظيفة البحث غير متوفرة بعد');
-        };
-
-        window.filterApps = typeof filterApps !== 'undefined' ? filterApps : function(category) {
-            console.log('🔍 تصفية التطبيقات حسب:', category);
-        };
-
-        window.displaySpecialSection = typeof displaySpecialSection !== 'undefined' ? displaySpecialSection : function(section) {
-            console.log('🔍 عرض القسم:', section);
-        };
+        // جعل الدوال متاحة عالمياً للاستخدام
+        window.hideMessage = hideMessage;
+        window.toggleDebugPanel = toggleDebugPanel;
+        window.forceShowInstall = forceShowInstall;
+        window.checkPWAStatus = checkPWAStatus;
     </script>
 </body>
 </html>
