@@ -787,6 +787,50 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 </script>
-   
+   <script>
+// كود طوارئ للتثبيت - يعمل حتى مع مشاكل الأيقونات
+function forcePWAInstall() {
+  // إنشاء زر تثبيت يدوي
+  const installBtn = document.createElement('button');
+  installBtn.innerHTML = '📲 اضغط لتثبيت التطبيق';
+  installBtn.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4361ee;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 25px;
+    font-size: 16px;
+    z-index: 10000;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  `;
+  
+  installBtn.onclick = () => {
+    if (window.deferredPrompt) {
+      window.deferredPrompt.prompt();
+    } else {
+      alert('✅ يمكنك تثبيت التطبيق من قائمة Chrome (النقاط الثلاث) → "Add to Home Screen"');
+    }
+  };
+  
+  document.body.appendChild(installBtn);
+}
+
+// محاولة التثبيت التلقائي
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.deferredPrompt = e;
+  forcePWAInstall();
+});
+
+// إذا لم يظهر الحدث، أظهر الزر بعد 5 ثواني
+setTimeout(() => {
+  if (!window.deferredPrompt) {
+    forcePWAInstall();
+  }
+}, 5000);
+</script>
 </body>
 </html>
