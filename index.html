@@ -1,296 +1,47 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-   <meta name="google-site-verification" content="yv8Fapy9yxl2XxCh03uMYT4h-T8OShA4EnsGmg_Hbh0" /> 
 <head>
-
-   <!-- PWA Meta Tags -->
-<meta name="application-name" content="وسيل بلاي">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="وسيل بلاي">
-<meta name="description" content="متجر التطبيقات العربي المجاني">
-<meta name="format-detection" content="telephone=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="msapplication-config" content="/browserconfig.xml">
-<meta name="msapplication-TileColor" content="#4361ee">
-<meta name="msapplication-tap-highlight" content="no">
-<meta name="theme-color" content="#4361ee">
-
-<!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png">
-
-<!-- Manifest -->
-<link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
-
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="/icons/icon-32x32.png" sizes="32x32">
-<link rel="icon" type="image/png" href="/icons/icon-16x16.png" sizes="16x16">
-<!-- PWA Meta Tags -->
-<meta name="application-name" content="وسيل بلاي">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="وسيل بلاي">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="msapplication-TileColor" content="#4361ee">
-<meta name="msapplication-tap-highlight" content="no">
-<meta name="theme-color" content="#4361ee">
-
-<!-- Manifest -->
-<link rel="manifest" href="manifest.json">
-
-<!-- Icons -->
-<link rel="icon" type="image/png" href="icons/icon-72x72.png">
-<link rel="apple-touch-icon" href="icons/icon-152x152.png">
-
-<!-- Service Worker Registration -->
-<script>
-// تسجيل Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-                console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-                console.log('SW registration failed: ', registrationError);
-            });
-    });
-}
-
-// اكتشاف إمكانية التثبيت
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // عرض زر التثبيت
-    const installButton = document.createElement('button');
-    installButton.innerHTML = '📲 تثبيت التطبيق';
-    installButton.style.cssText = `
-        position: fixed;
-        bottom: 100px;
-        right: 20px;
-        background: #4361ee;
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        font-family: inherit;
-    `;
-    
-    installButton.addEventListener('click', () => {
-        installButton.style.display = 'none';
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            }
-            deferredPrompt = null;
-        });
-    });
-    
-    document.body.appendChild(installButton);
-});
-</script>
-    <meta name="google-site-verification" content="yv8Fapy9yxl2XxCh03uMYT4h-T8OShA4EnsGmg_Hbh0" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wacel play-وسـيـل بلاي</title>
+    <title>وسيل بلاي - متجر التطبيقات العربي</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="وسيل بلاي - متجر التطبيقات العربي المجاني لتحميل أفضل التطبيقات والألعاب">
+    <meta name="keywords" content="تطبيقات, ألعاب, وسيل بلاي, متجر تطبيقات, تحميل تطبيقات">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="وسيل بلاي">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="وسيل بلاي">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#4361ee">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="theme-color" content="#4361ee">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/300/300218.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/300/300218.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+    
+    <!-- Styles & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/style.css">
-    <!-- إضافة Firebase SDK -->
+    
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script>
-// كود متقدم لإدارة PWA
-class PWAHelper {
-    constructor() {
-        this.deferredPrompt = null;
-        this.init();
-    }
-
-    init() {
-        this.setupInstallPrompt();
-        this.setupOfflineDetection();
-        this.setupAppInstalled();
-    }
-
-    setupInstallPrompt() {
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            this.deferredPrompt = e;
-            this.showInstallButton();
-        });
-    }
-
-    showInstallButton() {
-        // إنشاء زر تثبيت جميل
-        const installBtn = document.createElement('button');
-        installBtn.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-download"></i>
-                <span>تثبيت التطبيق</span>
-            </div>
-        `;
-        
-        installBtn.style.cssText = `
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, #4361ee, #3a56d4);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            z-index: 10000;
-            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        `;
-
-        installBtn.onmouseover = () => {
-            installBtn.style.transform = 'translateY(-2px)';
-            installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.4)';
-        };
-
-        installBtn.onmouseout = () => {
-            installBtn.style.transform = 'translateY(0)';
-            installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.3)';
-        };
-
-        installBtn.onclick = async () => {
-            if (!this.deferredPrompt) return;
-            
-            this.deferredPrompt.prompt();
-            const { outcome } = await this.deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('تم تثبيت التطبيق بنجاح');
-                installBtn.remove();
-                this.showInstallSuccess();
-            }
-            
-            this.deferredPrompt = null;
-        };
-
-        // إخفاء الزر إذا كان التطبيق مثبتاً بالفعل
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-            document.body.appendChild(installBtn);
-            
-            // إخفاء تلقائي بعد 10 ثواني
-            setTimeout(() => {
-                if (installBtn.parentNode) {
-                    installBtn.style.opacity = '0';
-                    setTimeout(() => installBtn.remove(), 300);
-                }
-            }, 10000);
-        }
-    }
-
-    showInstallSuccess() {
-        const message = document.createElement('div');
-        message.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-check-circle" style="color: #06d6a0;"></i>
-                <span>تم تثبيت التطبيق بنجاح!</span>
-            </div>
-        `;
-        
-        message.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: white;
-            color: #1a1a2e;
-            padding: 12px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 10000;
-            font-weight: 500;
-        `;
-
-        document.body.appendChild(message);
-        setTimeout(() => message.remove(), 3000);
-    }
-
-    setupOfflineDetection() {
-        window.addEventListener('online', () => {
-            this.showStatusMessage('🟢 عودة الاتصال بالإنترنت', '#06d6a0');
-        });
-
-        window.addEventListener('offline', () => {
-            this.showStatusMessage('🔴 أنت غير متصل بالإنترنت', '#ef4444');
-        });
-    }
-
-    setupAppInstalled() {
-        window.addEventListener('appinstalled', () => {
-            console.log('تم تثبيت التطبيق بنجاح!');
-            // يمكنك إضافة تحليلات هنا
-        });
-    }
-
-    showStatusMessage(text, color) {
-        const message = document.createElement('div');
-        message.textContent = text;
-        message.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: ${color};
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            z-index: 10000;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-        `;
-
-        document.body.appendChild(message);
-        setTimeout(() => {
-            message.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => message.remove(), 300);
-        }, 3000);
-    }
-}
-
-// تهيئة PWA عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    new PWAHelper();
-});
-
-// إضافة أنيميشن للرسائل
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
-</script>
-
 </head>
 <body>
     <!-- الشريط العلوي -->
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo-section">
-                <h1 class="logo"><i class="fab fa-google-play"></i> وسـيـل بلاي</h1>
+                <h1 class="logo"><i class="fab fa-google-play"></i> وسيل بلاي</h1>
             </div>
             <div class="nav-actions">
                 <div class="search-icon-top" id="searchIconTop">
@@ -312,7 +63,7 @@ document.head.appendChild(style);
         <section class="hero-section">
             <div class="hero-content">
                 <h1 class="hero-title">اكتشف عالم التطبيقات</h1>
-                <p class="hero-subtitle">احصل على أفضل التطبيقات المدفوعة من وسيل ستور مجانا </p>
+                <p class="hero-subtitle">احصل على أفضل التطبيقات المدفوعة من وسيل ستور مجاناً</p>
             </div>
         </section>
 
@@ -488,349 +239,314 @@ document.head.appendChild(style);
             
             <div class="test-credentials">
                 <h4><i class="fas fa-info-circle"></i> بيانات الاختبار:</h4>
-                <p><strong>:</strong> </p>
-                <p><strong> :</strong> </p>
+                <p><strong>البريد الإلكتروني:</strong> admin@wacelmarkt.com</p>
+                <p><strong>كلمة المرور:</strong> Admin123456</p>
             </div>
         </div>
     </div>
+
+    <!-- زر التثبيت (سيتم إضافته ديناميكياً) -->
+    <div id="pwa-install-container"></div>
 
     <!-- تحميل ملفات JavaScript -->
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
 
+    <!-- PWA Installation System -->
     <script>
-        // إدارة شريط البحث
-        document.getElementById('searchIconTop').addEventListener('click', function() {
-            document.getElementById('searchModal').style.display = 'block';
-        });
-
-        document.getElementById('bottomSearchBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('searchModal').style.display = 'block';
-        });
-
-        // إغلاق النافذة المنبثقة
-        document.querySelectorAll('.close').forEach(function(closeBtn) {
-            closeBtn.addEventListener('click', function() {
-                this.closest('.modal').style.display = 'none';
-            });
-        });
-
-        // إغلاق النافذة عند النقر خارجها
-        window.addEventListener('click', function(e) {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
+        // نظام PWA للتثبيت
+        class PWAInstaller {
+            constructor() {
+                this.deferredPrompt = null;
+                this.init();
             }
-        });
 
-        // البحث عند الضغط على Enter
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
+            init() {
+                this.setupInstallPrompt();
+                this.setupServiceWorker();
+                this.checkInstallStatus();
+                this.setupOfflineDetection();
             }
-        });
 
-        // التنقل في الشريط السفلي
-        document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.bottom-nav-item').forEach(function(i) {
-                    i.classList.remove('active');
+            setupServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('sw.js')
+                        .then(registration => {
+                            console.log('✅ Service Worker مسجل بنجاح:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.error('❌ فشل تسجيل Service Worker:', error);
+                        });
+                }
+            }
+
+            setupInstallPrompt() {
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    console.log('✅ حدث beforeinstallprompt تم تفعيله');
+                    e.preventDefault();
+                    this.deferredPrompt = e;
+                    this.showInstallButton();
                 });
-                this.classList.add('active');
+
+                window.addEventListener('appinstalled', () => {
+                    console.log('✅ التطبيق تم تثبيته بنجاح');
+                    this.hideInstallButton();
+                    this.deferredPrompt = null;
+                });
+            }
+
+            showInstallButton() {
+                if (this.isInstalled()) {
+                    console.log('✅ التطبيق مثبت بالفعل');
+                    return;
+                }
+
+                // إذا كان الزر موجوداً بالفعل، لا تنشئه مرة أخرى
+                if (document.getElementById('pwa-install-button')) {
+                    return;
+                }
+
+                const installBtn = document.createElement('button');
+                installBtn.id = 'pwa-install-button';
+                installBtn.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <i class="fas fa-download" style="font-size: 16px;"></i>
+                        <span>تثبيت التطبيق</span>
+                    </div>
+                `;
                 
-                const target = this.getAttribute('href');
-                if (target === '#games') {
-                    filterApps('games');
-                } else if (target === '#apps') {
-                    filterApps('all');
-                } else if (target === '#search') {
-                    document.getElementById('searchModal').style.display = 'block';
+                installBtn.style.cssText = `
+                    position: fixed;
+                    bottom: 100px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #4361ee, #3a56d4);
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    z-index: 10000;
+                    box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
+                    font-family: inherit;
+                    font-weight: 600;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    border: 2px solid white;
+                `;
+
+                installBtn.addEventListener('mouseenter', () => {
+                    installBtn.style.transform = 'translateY(-2px)';
+                    installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.4)';
+                });
+
+                installBtn.addEventListener('mouseleave', () => {
+                    installBtn.style.transform = 'translateY(0)';
+                    installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.3)';
+                });
+
+                installBtn.addEventListener('click', () => {
+                    this.installApp();
+                });
+
+                document.body.appendChild(installBtn);
+
+                // إخفاء تلقائي بعد 15 ثانية
+                setTimeout(() => {
+                    this.hideInstallButton();
+                }, 15000);
+            }
+
+            hideInstallButton() {
+                const installBtn = document.getElementById('pwa-install-button');
+                if (installBtn) {
+                    installBtn.style.opacity = '0';
+                    installBtn.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        if (installBtn.parentNode) {
+                            installBtn.parentNode.removeChild(installBtn);
+                        }
+                    }, 300);
+                }
+            }
+
+            async installApp() {
+                if (!this.deferredPrompt) {
+                    this.showMessage('❌ لا يمكن تثبيت التطبيق حالياً', 'error');
+                    return;
+                }
+
+                try {
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        console.log('✅ المستخدم قبل التثبيت');
+                        this.showMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
+                        this.hideInstallButton();
+                    } else {
+                        console.log('❌ المستخدم رفض التثبيت');
+                        this.showMessage('⚠️ تم إلغاء التثبيت', 'warning');
+                    }
+                    
+                    this.deferredPrompt = null;
+                } catch (error) {
+                    console.error('❌ خطأ أثناء التثبيت:', error);
+                    this.showMessage('❌ حدث خطأ أثناء التثبيت', 'error');
+                }
+            }
+
+            isInstalled() {
+                return window.matchMedia('(display-mode: standalone)').matches;
+            }
+
+            checkInstallStatus() {
+                if (this.isInstalled()) {
+                    console.log('🟢 التطبيق يعمل في وضع المثبت');
+                } else {
+                    console.log('🔵 التطبيق يعمل في وضع المتصفح');
+                }
+            }
+
+            setupOfflineDetection() {
+                window.addEventListener('online', () => {
+                    this.showMessage('🟢 عودة الاتصال بالإنترنت', 'success');
+                });
+
+                window.addEventListener('offline', () => {
+                    this.showMessage('🔴 أنت غير متصل بالإنترنت', 'error');
+                });
+            }
+
+            showMessage(text, type) {
+                // إزالة أي رسائل سابقة
+                const existingMsg = document.getElementById('pwa-message');
+                if (existingMsg) existingMsg.remove();
+
+                const message = document.createElement('div');
+                message.id = 'pwa-message';
+                message.innerHTML = text;
+                
+                const bgColor = type === 'success' ? '#10b981' : 
+                               type === 'error' ? '#ef4444' : '#f59e0b';
+                
+                message.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    right: 20px;
+                    background: ${bgColor};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    z-index: 10001;
+                    font-weight: 500;
+                    animation: slideInRight 0.3s ease;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                `;
+
+                document.body.appendChild(message);
+
+                setTimeout(() => {
+                    message.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (message.parentNode) message.remove();
+                    }, 300);
+                }, 3000);
+            }
+        }
+
+        // إدارة واجهة المستخدم الأساسية
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 بدء تحميل وسيل بلاي...");
+
+            // إضافة أنيميشن للرسائل
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // بدء نظام PWA
+            window.pwaInstaller = new PWAInstaller();
+
+            // إدارة شريط البحث
+            document.getElementById('searchIconTop').addEventListener('click', function() {
+                document.getElementById('searchModal').style.display = 'block';
+            });
+
+            document.getElementById('bottomSearchBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('searchModal').style.display = 'block';
+            });
+
+            // إغلاق النوافذ المنبثقة
+            document.querySelectorAll('.close').forEach(function(closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // إغلاق النوافذ عند النقر خارجها
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
                 }
             });
-        });
-    </script>
-    
-    
-    <script>
-// كود PWA مبسط للهاتف
-console.log('🚀 بدء تحميل PWA...');
 
-// 1. تسجيل Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('✅ Service Worker مسجل'))
-        .catch(err => console.log('❌ خطأ Service Worker:', err));
-}
-
-// 2. اكتشاف إمكانية التثبيت
-let installPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('✅ يمكن تثبيت التطبيق!');
-    e.preventDefault();
-    installPrompt = e;
-    showInstallButton();
-});
-
-// 3. عرض زر التثبيت
-function showInstallButton() {
-    const btn = document.createElement('button');
-    btn.innerHTML = '📲 تثبيت التطبيق';
-    btn.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        right: 15px;
-        background: #4361ee;
-        color: white;
-        border: none;
-        padding: 12px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: bold;
-        z-index: 10000;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    `;
-    
-    btn.onclick = async () => {
-        if (!installPrompt) return;
-        installPrompt.prompt();
-        const result = await installPrompt.userChoice;
-        if (result.outcome === 'accepted') {
-            console.log('✅ تم قبول التثبيت');
-            btn.remove();
-        }
-        installPrompt = null;
-    };
-    
-    document.body.appendChild(btn);
-}
-
-// 4. التحقق من التثبيت
-if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('✅ التطبيق مثبت بالفعل');
-}
-</script>
-
-<script>
-// كود متقدم لإدارة PWA
-class PWAHelper {
-    constructor() {
-        this.deferredPrompt = null;
-        this.init();
-    }
-
-    init() {
-        this.setupInstallPrompt();
-        this.setupOfflineDetection();
-        this.setupAppInstalled();
-    }
-
-    setupInstallPrompt() {
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            this.deferredPrompt = e;
-            this.showInstallButton();
-        });
-    }
-
-    showInstallButton() {
-        // إنشاء زر تثبيت جميل
-        const installBtn = document.createElement('button');
-        installBtn.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-download"></i>
-                <span>تثبيت التطبيق</span>
-            </div>
-        `;
-        
-        installBtn.style.cssText = `
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, #4361ee, #3a56d4);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            z-index: 10000;
-            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.3);
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        `;
-
-        installBtn.onmouseover = () => {
-            installBtn.style.transform = 'translateY(-2px)';
-            installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.4)';
-        };
-
-        installBtn.onmouseout = () => {
-            installBtn.style.transform = 'translateY(0)';
-            installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.3)';
-        };
-
-        installBtn.onclick = async () => {
-            if (!this.deferredPrompt) return;
-            
-            this.deferredPrompt.prompt();
-            const { outcome } = await this.deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('تم تثبيت التطبيق بنجاح');
-                installBtn.remove();
-                this.showInstallSuccess();
-            }
-            
-            this.deferredPrompt = null;
-        };
-
-        // إخفاء الزر إذا كان التطبيق مثبتاً بالفعل
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-            document.body.appendChild(installBtn);
-            
-            // إخفاء تلقائي بعد 10 ثواني
-            setTimeout(() => {
-                if (installBtn.parentNode) {
-                    installBtn.style.opacity = '0';
-                    setTimeout(() => installBtn.remove(), 300);
+            // البحث عند الضغط على Enter
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
                 }
-            }, 10000);
-        }
-    }
+            });
 
-    showInstallSuccess() {
-        const message = document.createElement('div');
-        message.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-check-circle" style="color: #06d6a0;"></i>
-                <span>تم تثبيت التطبيق بنجاح!</span>
-            </div>
-        `;
-        
-        message.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: white;
-            color: #1a1a2e;
-            padding: 12px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 10000;
-            font-weight: 500;
-        `;
+            // التنقل في الشريط السفلي
+            document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.bottom-nav-item').forEach(function(i) {
+                        i.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const target = this.getAttribute('href');
+                    if (target === '#games') {
+                        filterApps('games');
+                    } else if (target === '#apps') {
+                        filterApps('all');
+                    } else if (target === '#search') {
+                        document.getElementById('searchModal').style.display = 'block';
+                    }
+                });
+            });
 
-        document.body.appendChild(message);
-        setTimeout(() => message.remove(), 3000);
-    }
+            // التحقق من Manifest
+            fetch('manifest.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Manifest غير موجود');
+                    return response.json();
+                })
+                .then(manifest => {
+                    console.log('✅ Manifest محمل:', manifest.name);
+                })
+                .catch(error => {
+                    console.warn('⚠️ Manifest غير متوفر:', error);
+                });
 
-    setupOfflineDetection() {
-        window.addEventListener('online', () => {
-            this.showStatusMessage('🟢 عودة الاتصال بالإنترنت', '#06d6a0');
+            console.log("✅ تم تحميل الصفحة بالكامل");
         });
 
-        window.addEventListener('offline', () => {
-            this.showStatusMessage('🔴 أنت غير متصل بالإنترنت', '#ef4444');
-        });
-    }
-
-    setupAppInstalled() {
-        window.addEventListener('appinstalled', () => {
-            console.log('تم تثبيت التطبيق بنجاح!');
-            // يمكنك إضافة تحليلات هنا
-        });
-    }
-
-    showStatusMessage(text, color) {
-        const message = document.createElement('div');
-        message.textContent = text;
-        message.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: ${color};
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            z-index: 10000;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-        `;
-
-        document.body.appendChild(message);
-        setTimeout(() => {
-            message.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => message.remove(), 300);
-        }, 3000);
-    }
-}
-
-// تهيئة PWA عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    new PWAHelper();
-});
-
-// إضافة أنيميشن للرسائل
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
-</script>
-   <script>
-// كود طوارئ للتثبيت - يعمل حتى مع مشاكل الأيقونات
-function forcePWAInstall() {
-  // إنشاء زر تثبيت يدوي
-  const installBtn = document.createElement('button');
-  installBtn.innerHTML = '📲 اضغط لتثبيت التطبيق';
-  installBtn.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #4361ee;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 25px;
-    font-size: 16px;
-    z-index: 10000;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  `;
-  
-  installBtn.onclick = () => {
-    if (window.deferredPrompt) {
-      window.deferredPrompt.prompt();
-    } else {
-      alert('✅ يمكنك تثبيت التطبيق من قائمة Chrome (النقاط الثلاث) → "Add to Home Screen"');
-    }
-  };
-  
-  document.body.appendChild(installBtn);
-}
-
-// محاولة التثبيت التلقائي
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  window.deferredPrompt = e;
-  forcePWAInstall();
-});
-
-// إذا لم يظهر الحدث، أظهر الزر بعد 5 ثواني
-setTimeout(() => {
-  if (!window.deferredPrompt) {
-    forcePWAInstall();
-  }
-}, 5000);
-</script>
+        // جعل الدوال متاحة عالمياً
+        window.performSearch = performSearch;
+        window.filterApps = filterApps;
+        window.displaySpecialSection = displaySpecialSection;
+    </script>
 </body>
 </html>
