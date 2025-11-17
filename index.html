@@ -3,120 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وسيل بلاي - متجر التطبيقات العربي</title>
-    
-    <!-- Meta Tags -->
-    <meta name="description" content="وسيل بلاي - متجر التطبيقات العربي المجاني لتحميل أفضل التطبيقات والألعاب">
-    <meta name="keywords" content="تطبيقات, ألعاب, وسيل بلاي, متجر تطبيقات, تحميل تطبيقات">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="application-name" content="وسيل بلاي">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="وسيل بلاي">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="msapplication-TileColor" content="#4361ee">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="theme-color" content="#4361ee">
-    
-    <!-- Icons -->
-    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
-    
-    <!-- Styles & Icons -->
+    <title>Wacel play-وسـيـل بلاي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/style.css">
-    
-    <!-- Firebase SDK -->
+    <!-- إضافة Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    
-    <style>
-        /* أنميشن للرسائل */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        /* تنسيقات PWA */
-        .pwa-install-btn {
-            position: fixed;
-            bottom: 120px;
-            right: 15px;
-            background: linear-gradient(135deg, #4361ee, #3a56d4);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            z-index: 10000;
-            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            border: 2px solid white;
-            animation: bounce 2s infinite;
-        }
-        
-        .pwa-install-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 25px rgba(67, 97, 238, 0.6);
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-10px);}
-            60% {transform: translateY(-5px);}
-        }
-        
-        .offline-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #e74c3c;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            z-index: 10001;
-            animation: slideInRight 0.3s ease;
-        }
-        
-        .online-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #27ae60;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            z-index: 10001;
-            animation: slideInRight 0.3s ease;
-        }
-        
-        .pwa-fullscreen-padding {
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-    </style>
 </head>
 <body>
     <!-- الشريط العلوي -->
     <nav class="top-navbar">
         <div class="nav-container">
             <div class="logo-section">
-                <h1 class="logo"><i class="fab fa-google-play"></i> وسيل بلاي</h1>
+                <h1 class="logo"><i class="fab fa-google-play"></i> وسـيـل بلاي</h1>
             </div>
             <div class="nav-actions">
                 <div class="search-icon-top" id="searchIconTop">
@@ -138,7 +38,7 @@
         <section class="hero-section">
             <div class="hero-content">
                 <h1 class="hero-title">اكتشف عالم التطبيقات</h1>
-                <p class="hero-subtitle">احصل على أفضل التطبيقات المدفوعة من وسيل ستور مجاناً</p>
+                <p class="hero-subtitle">احصل على أفضل التطبيقات المدفوعة من وسيل ستور مجانا </p>
             </div>
         </section>
 
@@ -146,31 +46,31 @@
         <section class="categories-section">
             <div class="categories-scroll-container">
                 <div class="categories-scroll">
-                    <button class="category-filter active" data-category="all">
+                    <button class="category-filter active" data-category="all" onclick="filterApps('all')">
                         <i class="fas fa-th-large"></i>
                         <span>الكل</span>
                     </button>
-                    <button class="category-filter" data-category="games">
+                    <button class="category-filter" data-category="games" onclick="filterApps('games')">
                         <i class="fas fa-gamepad"></i>
                         <span>الألعاب</span>
                     </button>
-                    <button class="category-filter" data-category="social">
+                    <button class="category-filter" data-category="social" onclick="filterApps('social')">
                         <i class="fas fa-comments"></i>
                         <span>التواصل</span>
                     </button>
-                    <button class="category-filter" data-category="entertainment">
+                    <button class="category-filter" data-category="entertainment" onclick="filterApps('entertainment')">
                         <i class="fas fa-film"></i>
                         <span>الترفيه</span>
                     </button>
-                    <button class="category-filter" data-category="productivity">
+                    <button class="category-filter" data-category="productivity" onclick="filterApps('productivity')">
                         <i class="fas fa-briefcase"></i>
                         <span>فتوغرافي</span>
                     </button>
-                    <button class="category-filter" data-category="education">
+                    <button class="category-filter" data-category="education" onclick="filterApps('education')">
                         <i class="fas fa-graduation-cap"></i>
                         <span>الذكاء الاصطناعي</span>
                     </button>
-                    <button class="category-filter" data-category="utility">
+                    <button class="category-filter" data-category="utility" onclick="filterApps('utility')">
                         <i class="fas fa-tools"></i>
                         <span>الأدوات</span>
                     </button>
@@ -200,15 +100,15 @@
         <!-- أقسام خاصة -->
         <section class="special-sections">
             <div class="section-tabs">
-                <button class="section-tab" data-section="featured">
+                <button class="section-tab" data-section="featured" onclick="displaySpecialSection('featured')">
                     <i class="fas fa-star"></i>
                     <span>مقترحة لك</span>
                 </button>
-                <button class="section-tab" data-section="trending">
+                <button class="section-tab" data-section="trending" onclick="displaySpecialSection('trending')">
                     <i class="fas fa-fire"></i>
                     <span>الأكثر رواجاً</span>
                 </button>
-                <button class="section-tab" data-section="top">
+                <button class="section-tab" data-section="top" onclick="displaySpecialSection('top')">
                     <i class="fas fa-crown"></i>
                     <span>التطبيقات المميزة</span>
                 </button>
@@ -288,7 +188,7 @@
                 <div class="search-bar">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="searchInput" placeholder="ابحث عن التطبيقات...">
-                    <button class="search-btn" id="searchButton">بحث</button>
+                    <button class="search-btn" onclick="performSearch()">بحث</button>
                 </div>
             </div>
         </div>
@@ -314,7 +214,7 @@
             
             <div class="test-credentials">
                 <h4><i class="fas fa-info-circle"></i> بيانات الاختبار:</h4>
-                <p><strong>البريد الإلكتروني:</strong> admin@wacelmarkt.com</p>
+                <p><strong>البريد:</strong> admin@wacelmarkt.com</p>
                 <p><strong>كلمة المرور:</strong> Admin123456</p>
             </div>
         </div>
@@ -325,300 +225,57 @@
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- نظام PWA المحسن -->
     <script>
-        // نظام PWA كامل
-        console.log('🚀 بدء تحميل نظام PWA...');
-
-        // متغيرات PWA
-        let deferredPrompt = null;
-        let isAppInstalled = false;
-        let serviceWorkerRegistration = null;
-
-        // تسجيل Service Worker
-        function registerServiceWorker() {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('✅ Service Worker مسجل:', registration.scope);
-                        serviceWorkerRegistration = registration;
-                        checkForUpdates();
-                    })
-                    .catch(error => {
-                        console.log('⚠️ Service Worker غير مسجل:', error);
-                    });
-            }
-        }
-
-        // التحقق من التحديثات
-        function checkForUpdates() {
-            if (serviceWorkerRegistration) {
-                serviceWorkerRegistration.update();
-            }
-        }
-
-        // التحقق من حالة التثبيت
-        function checkInstallStatus() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            if (isStandalone) {
-                console.log('✅ التطبيق مثبت بالفعل');
-                isAppInstalled = true;
-                document.body.classList.add('pwa-fullscreen-padding');
-                return true;
-            }
-            return false;
-        }
-
-        // إدارة حالة الاتصال
-        function setupConnectionMonitor() {
-            window.addEventListener('online', function() {
-                showOnlineMessage();
-                // إعادة تحميل البيانات عند العودة للاتصال
-                if (typeof loadApps === 'function') {
-                    loadApps();
-                }
-            });
-
-            window.addEventListener('offline', function() {
-                showOfflineMessage();
-            });
-
-            // التحقق الأولي
-            if (!navigator.onLine) {
-                showOfflineMessage();
-            }
-        }
-
-        function showOfflineMessage() {
-            const existingBanner = document.querySelector('.offline-banner');
-            if (existingBanner) return;
-
-            const banner = document.createElement('div');
-            banner.className = 'offline-banner';
-            banner.innerHTML = `
-                <i class="fas fa-wifi"></i>
-                أنت غير متصل بالإنترنت - الوضع غير متصل
-            `;
-            document.body.appendChild(banner);
-        }
-
-        function showOnlineMessage() {
-            const existingBanner = document.querySelector('.online-banner');
-            if (existingBanner) existingBanner.remove();
-
-            const offlineBanner = document.querySelector('.offline-banner');
-            if (offlineBanner) offlineBanner.remove();
-
-            const banner = document.createElement('div');
-            banner.className = 'online-banner';
-            banner.innerHTML = `
-                <i class="fas fa-wifi"></i>
-                تم استعادة الاتصال بالإنترنت
-            `;
-            document.body.appendChild(banner);
-
-            setTimeout(() => {
-                if (banner.parentNode) {
-                    banner.parentNode.removeChild(banner);
-                }
-            }, 3000);
-        }
-
-        // إظهار زر التثبيت
-        function showInstallButton() {
-            if (checkInstallStatus()) return;
-            
-            if (document.getElementById('pwa-install-button')) return;
-
-            console.log('🔄 عرض زر التثبيت...');
-
-            const installBtn = document.createElement('button');
-            installBtn.id = 'pwa-install-button';
-            installBtn.className = 'pwa-install-btn';
-            installBtn.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                    <i class="fas fa-download" style="font-size: 16px;"></i>
-                    <span>تثبيت التطبيق</span>
-                </div>
-            `;
-
-            installBtn.addEventListener('click', handleInstallClick);
-            document.body.appendChild(installBtn);
-        }
-
-        // إخفاء زر التثبيت
-        function hideInstallButton() {
-            const installBtn = document.getElementById('pwa-install-button');
-            if (installBtn) {
-                installBtn.style.opacity = '0';
-                installBtn.style.transform = 'translateY(10px)';
-                setTimeout(() => {
-                    if (installBtn.parentNode) {
-                        installBtn.parentNode.removeChild(installBtn);
-                        console.log('🔻 زر التثبيت مخفي');
-                    }
-                }, 300);
-            }
-        }
-
-        // التعامل مع النقر على زر التثبيت
-        async function handleInstallClick() {
-            if (deferredPrompt) {
-                try {
-                    console.log('🔄 بدء عملية التثبيت...');
-                    
-                    deferredPrompt.prompt();
-                    
-                    const choiceResult = await deferredPrompt.userChoice;
-                    console.log('🎯 اختيار المستخدم:', choiceResult);
-                    
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ المستخدم قبل التثبيت');
-                        showTempMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
-                        isAppInstalled = true;
-                        hideInstallButton();
-                    } else {
-                        console.log('❌ المستخدم رفض التثبيت');
-                        showTempMessage('⚠️ تم إلغاء التثبيت', 'warning');
-                    }
-                    
-                    deferredPrompt = null;
-                    
-                } catch (error) {
-                    console.error('❌ خطأ أثناء التثبيت:', error);
-                    showManualInstallGuide();
-                }
-            } else {
-                console.log('🔍 deferredPrompt غير متوفر');
-                showManualInstallGuide();
-            }
-        }
-
-        // إظهار دليل التثبيت اليدوي
-        function showManualInstallGuide() {
-            const guide = `
-                <div style="text-align: center; padding: 25px; max-width: 320px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    <h3 style="margin-bottom: 20px; color: #333;">📱 كيفية تثبيت التطبيق</h3>
-                    <div style="text-align: right; line-height: 2.2; color: #555; margin-bottom: 20px;">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</span>
-                            <span>اضغط على <strong>النقاط الثلاث</strong> ⋮ أعلى المتصفح</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span>
-                            <span>اختر <strong>"Add to Home Screen"</strong></span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="background: #4361ee; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span>
-                            <span>اضغط <strong>"Add"</strong> أو <strong>"تثبيت"</strong></span>
-                        </div>
-                    </div>
-                    <button onclick="hideMessage()" style="padding: 12px 30px; background: #4361ee; color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;">حسناً</button>
-                </div>
-            `;
-            showMessage(guide);
-        }
-
-        // إظهار رسالة للمستخدم
-        function showMessage(content, type = 'info') {
-            hideMessage();
-
-            const message = document.createElement('div');
-            message.innerHTML = content;
-            
-            const bgColor = type === 'success' ? '#10b981' : 
-                           type === 'error' ? '#ef4444' : 
-                           type === 'warning' ? '#f59e0b' : 'white';
-            
-            message.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: ${bgColor};
-                color: ${type === 'info' ? '#333' : 'white'};
-                padding: 20px;
-                border-radius: 15px;
-                z-index: 10002;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                max-width: 90%;
-                animation: slideInRight 0.3s ease;
-            `;
-
-            document.body.appendChild(message);
-            window.currentMessage = message;
-        }
-
-        // إخفاء الرسالة
-        function hideMessage() {
-            if (window.currentMessage && window.currentMessage.parentNode) {
-                window.currentMessage.parentNode.removeChild(window.currentMessage);
-                window.currentMessage = null;
-            }
-        }
-
-        // عرض رسالة مؤقتة
-        function showTempMessage(text, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `temp-message ${type}`;
-            messageDiv.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
-                <span>${text}</span>
-            `;
-            
-            document.body.appendChild(messageDiv);
-            
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
-                }
-            }, 3000);
-        }
-
-        // تهيئة النظام عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 بدء تهيئة نظام PWA...');
-            
-            // تسجيل Service Worker
-            registerServiceWorker();
-            
-            // إدارة حالة الاتصال
-            setupConnectionMonitor();
-            
-            // التحقق من حالة التثبيت
-            checkInstallStatus();
-            
-            // الاستماع لحدث beforeinstallprompt
-            window.addEventListener('beforeinstallprompt', (e) => {
-                console.log('🎉 حدث beforeinstallprompt تم تشغيله!');
-                
-                e.preventDefault();
-                deferredPrompt = e;
-                showInstallButton();
-            });
-
-            // الاستماع لحدث appinstalled
-            window.addEventListener('appinstalled', (evt) => {
-                console.log('✅ التطبيق تم تثبيته بنجاح!');
-                isAppInstalled = true;
-                hideInstallButton();
-                showTempMessage('✅ تم تثبيت التطبيق بنجاح!', 'success');
-            });
-
-            // عرض زر التثبيت يدوياً إذا لم يظهر خلال 3 ثوان
-            setTimeout(() => {
-                if (!deferredPrompt && !isAppInstalled) {
-                    console.log('⏰ عرض زر التثبيت يدوياً');
-                    showInstallButton();
-                }
-            }, 3000);
-
-            console.log("✅ تم تحميل الصفحة بالكامل");
+        // إدارة شريط البحث
+        document.getElementById('searchIconTop').addEventListener('click', function() {
+            document.getElementById('searchModal').style.display = 'block';
         });
 
-        // جعل الدوال متاحة عالمياً
-        window.hideMessage = hideMessage;
-        window.showTempMessage = showTempMessage;
+        document.getElementById('bottomSearchBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('searchModal').style.display = 'block';
+        });
+
+        // إغلاق النافذة المنبثقة
+        document.querySelectorAll('.close').forEach(function(closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // إغلاق النافذة عند النقر خارجها
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+
+        // البحث عند الضغط على Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // التنقل في الشريط السفلي
+        document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.bottom-nav-item').forEach(function(i) {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const target = this.getAttribute('href');
+                if (target === '#games') {
+                    filterApps('games');
+                } else if (target === '#apps') {
+                    filterApps('all');
+                } else if (target === '#search') {
+                    document.getElementById('searchModal').style.display = 'block';
+                }
+            });
+        });
     </script>
 </body>
 </html>
