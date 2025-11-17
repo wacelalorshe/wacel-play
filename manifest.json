@@ -1,15 +1,16 @@
 {
-  "name": "وسيل بلاي - متجر التطبيقات",
+  "name": "وسيل بلاي",
   "short_name": "وسيل بلاي",
   "description": "متجر التطبيقات العربي المجاني لتحميل أفضل التطبيقات والألعاب",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#4361ee",
   "theme_color": "#4361ee",
   "orientation": "portrait",
   "scope": "/",
   "lang": "ar",
   "dir": "rtl",
+  "categories": ["entertainment", "shopping"],
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/300/300218.png",
@@ -23,6 +24,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["entertainment", "shopping"]
+  ]
 }
