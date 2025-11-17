@@ -36,8 +36,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
-    <!-- Eruda for Mobile Debugging -->
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <style>
         /* أنميشن للرسائل */
         @keyframes slideInRight {
@@ -47,11 +45,6 @@
         @keyframes slideOutRight {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        /* تنسيقات Eruda */
-        .eruda-container {
-            direction: ltr !important;
         }
     </style>
 </head>
@@ -90,31 +83,31 @@
         <section class="categories-section">
             <div class="categories-scroll-container">
                 <div class="categories-scroll">
-                    <button class="category-filter active" data-category="all" onclick="filterApps('all')">
+                    <button class="category-filter active" data-category="all">
                         <i class="fas fa-th-large"></i>
                         <span>الكل</span>
                     </button>
-                    <button class="category-filter" data-category="games" onclick="filterApps('games')">
+                    <button class="category-filter" data-category="games">
                         <i class="fas fa-gamepad"></i>
                         <span>الألعاب</span>
                     </button>
-                    <button class="category-filter" data-category="social" onclick="filterApps('social')">
+                    <button class="category-filter" data-category="social">
                         <i class="fas fa-comments"></i>
                         <span>التواصل</span>
                     </button>
-                    <button class="category-filter" data-category="entertainment" onclick="filterApps('entertainment')">
+                    <button class="category-filter" data-category="entertainment">
                         <i class="fas fa-film"></i>
                         <span>الترفيه</span>
                     </button>
-                    <button class="category-filter" data-category="productivity" onclick="filterApps('productivity')">
+                    <button class="category-filter" data-category="productivity">
                         <i class="fas fa-briefcase"></i>
                         <span>فتوغرافي</span>
                     </button>
-                    <button class="category-filter" data-category="education" onclick="filterApps('education')">
+                    <button class="category-filter" data-category="education">
                         <i class="fas fa-graduation-cap"></i>
                         <span>الذكاء الاصطناعي</span>
                     </button>
-                    <button class="category-filter" data-category="utility" onclick="filterApps('utility')">
+                    <button class="category-filter" data-category="utility">
                         <i class="fas fa-tools"></i>
                         <span>الأدوات</span>
                     </button>
@@ -144,15 +137,15 @@
         <!-- أقسام خاصة -->
         <section class="special-sections">
             <div class="section-tabs">
-                <button class="section-tab" data-section="featured" onclick="displaySpecialSection('featured')">
+                <button class="section-tab" data-section="featured">
                     <i class="fas fa-star"></i>
                     <span>مقترحة لك</span>
                 </button>
-                <button class="section-tab" data-section="trending" onclick="displaySpecialSection('trending')">
+                <button class="section-tab" data-section="trending">
                     <i class="fas fa-fire"></i>
                     <span>الأكثر رواجاً</span>
                 </button>
-                <button class="section-tab" data-section="top" onclick="displaySpecialSection('top')">
+                <button class="section-tab" data-section="top">
                     <i class="fas fa-crown"></i>
                     <span>التطبيقات المميزة</span>
                 </button>
@@ -232,7 +225,7 @@
                 <div class="search-bar">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="searchInput" placeholder="ابحث عن التطبيقات...">
-                    <button class="search-btn" onclick="performSearch()">بحث</button>
+                    <button class="search-btn" id="searchButton">بحث</button>
                 </div>
             </div>
         </div>
@@ -277,46 +270,9 @@
 
     <!-- نظام PWA و Eruda -->
     <script>
-        // تفعيل Eruda لأدوات المطور على الهاتف
-        console.log('🚀 بدء تحميل نظام التصحيح...');
-        
-        // إعدادات Eruda
-        eruda.init({
-            tool: ['console', 'elements', 'network', 'resources', 'sources', 'info'],
-            defaults: {
-                displaySize: 50,
-                transparency: 0.9,
-                theme: 'Dark'
-            }
-        });
+        // نظام PWA المحسن مع إصلاح الأخطاء
+        let pwaInstaller = null;
 
-        // إضافة زر تحكم بـ Eruda
-        const erudaBtn = document.createElement('button');
-        erudaBtn.innerHTML = '🔧';
-        erudaBtn.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: #4361ee;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
-        erudaBtn.onclick = () => {
-            eruda.show();
-        };
-        document.body.appendChild(erudaBtn);
-
-        // نظام PWA المحسن
         class PWAInstaller {
             constructor() {
                 this.deferredPrompt = null;
@@ -326,14 +282,66 @@
             }
 
             init() {
-                console.log('🟢 تهيئة نظام PWA مع Eruda...');
+                console.log('🟢 تهيئة نظام PWA...');
+                this.setupEruda();
                 this.createDebugPanel();
                 this.checkManifest();
                 this.setupServiceWorker();
                 this.setupInstallPrompt();
                 this.checkInstallStatus();
                 this.setupFallbackInstall();
-                this.showDebugInfo('System initialized with Eruda');
+                this.showDebugInfo('System initialized');
+            }
+
+            setupEruda() {
+                // تحميل Eruda ديناميكياً لتجنب الأخطاء
+                if (typeof eruda === 'undefined') {
+                    console.log('🔄 جاري تحميل Eruda...');
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+                    script.onload = () => {
+                        eruda.init();
+                        this.setupErudaButton();
+                        console.log('✅ Eruda loaded successfully');
+                    };
+                    script.onerror = () => {
+                        console.log('❌ Failed to load Eruda, continuing without debug tools');
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    this.setupErudaButton();
+                }
+            }
+
+            setupErudaButton() {
+                const erudaBtn = document.createElement('button');
+                erudaBtn.innerHTML = '🔧';
+                erudaBtn.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 20px;
+                    width: 50px;
+                    height: 50px;
+                    background: #4361ee;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    font-size: 20px;
+                    cursor: pointer;
+                    z-index: 10000;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                erudaBtn.addEventListener('click', () => {
+                    if (typeof eruda !== 'undefined') {
+                        eruda.show();
+                    } else {
+                        this.showMessage('❌ Eruda غير محملة', 'error');
+                    }
+                });
+                document.body.appendChild(erudaBtn);
             }
 
             createDebugPanel() {
@@ -346,18 +354,18 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 8px;">
                             <strong>🔧 تصحيح PWA المباشر</strong>
                             <div>
-                                <button onclick="pwaInstaller.toggleDebug()" style="margin-right: 5px; padding: 3px 8px; background: #666; color: white; border: none; border-radius: 3px; font-size: 10px;">إخفاء</button>
-                                <button onclick="document.getElementById('pwa-debug-panel').remove()" style="padding: 3px 8px; background: #ef4444; color: white; border: none; border-radius: 3px; font-size: 10px;">✕</button>
+                                <button id="toggleDebugBtn" style="margin-right: 5px; padding: 3px 8px; background: #666; color: white; border: none; border-radius: 3px; font-size: 10px;">إخفاء</button>
+                                <button id="closeDebugBtn" style="padding: 3px 8px; background: #ef4444; color: white; border: none; border-radius: 3px; font-size: 10px;">✕</button>
                             </div>
                         </div>
                         <div id="debug-content" style="line-height: 1.6;">
                             <div>⏳ جاري التحميل...</div>
                         </div>
                         <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                            <button onclick="pwaInstaller.forceShowInstall()" style="padding: 6px; background: #4361ee; color: white; border: none; border-radius: 6px; font-size: 11px;">إظهار التثبيت</button>
-                            <button onclick="pwaInstaller.checkStatus()" style="padding: 6px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص الحالة</button>
-                            <button onclick="pwaInstaller.testManifest()" style="padding: 6px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص Manifest</button>
-                            <button onclick="pwaInstaller.showManualGuide()" style="padding: 6px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 11px;">دليل التثبيت</button>
+                            <button id="forceInstallBtn" style="padding: 6px; background: #4361ee; color: white; border: none; border-radius: 6px; font-size: 11px;">إظهار التثبيت</button>
+                            <button id="checkStatusBtn" style="padding: 6px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص الحالة</button>
+                            <button id="testManifestBtn" style="padding: 6px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 11px;">فحص Manifest</button>
+                            <button id="showManualBtn" style="padding: 6px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-size: 11px;">دليل التثبيت</button>
                         </div>
                     </div>
                 `;
@@ -370,23 +378,51 @@
                 `;
 
                 document.body.appendChild(debugPanel);
-                this.debugPanel = debugPanel;
+                this.attachDebugEvents();
+            }
+
+            attachDebugEvents() {
+                // استخدام setTimeout لضمان تحميل العناصر أولاً
+                setTimeout(() => {
+                    const toggleBtn = document.getElementById('toggleDebugBtn');
+                    const closeBtn = document.getElementById('closeDebugBtn');
+                    const forceInstallBtn = document.getElementById('forceInstallBtn');
+                    const checkStatusBtn = document.getElementById('checkStatusBtn');
+                    const testManifestBtn = document.getElementById('testManifestBtn');
+                    const showManualBtn = document.getElementById('showManualBtn');
+
+                    if (toggleBtn) toggleBtn.addEventListener('click', () => this.toggleDebug());
+                    if (closeBtn) closeBtn.addEventListener('click', () => this.closeDebug());
+                    if (forceInstallBtn) forceInstallBtn.addEventListener('click', () => this.forceShowInstall());
+                    if (checkStatusBtn) checkStatusBtn.addEventListener('click', () => this.checkStatus());
+                    if (testManifestBtn) testManifestBtn.addEventListener('click', () => this.testManifest());
+                    if (showManualBtn) showManualBtn.addEventListener('click', () => this.showManualGuide());
+                }, 100);
             }
 
             toggleDebug() {
-                const content = this.debugPanel.querySelector('#debug-content');
-                if (content.style.display === 'none') {
-                    content.style.display = 'block';
-                    this.showDebugInfo('تم إظهار لوحة التصحيح');
-                } else {
-                    content.style.display = 'none';
+                const content = document.getElementById('debug-content');
+                if (content) {
+                    if (content.style.display === 'none') {
+                        content.style.display = 'block';
+                        this.showDebugInfo('تم إظهار لوحة التصحيح');
+                    } else {
+                        content.style.display = 'none';
+                    }
+                }
+            }
+
+            closeDebug() {
+                const panel = document.getElementById('pwa-debug-panel');
+                if (panel) {
+                    panel.remove();
                 }
             }
 
             updateDebugInfo(content) {
-                if (!this.debugMode || !this.debugPanel) return;
+                if (!this.debugMode) return;
                 
-                const debugContent = this.debugPanel.querySelector('#debug-content');
+                const debugContent = document.getElementById('debug-content');
                 if (debugContent) {
                     debugContent.innerHTML = content;
                 }
@@ -474,18 +510,9 @@
                     navigator.serviceWorker.register('sw.js')
                         .then(registration => {
                             this.showDebugInfo('✅ Service Worker مسجل: ' + registration.scope);
-                            
-                            if (registration.installing) {
-                                console.log('Service Worker جاري التثبيت...');
-                            } else if (registration.waiting) {
-                                console.log('Service Worker بانتظار التفعيل');
-                            } else if (registration.active) {
-                                console.log('Service Worker نشط');
-                            }
                         })
                         .catch(error => {
                             this.showDebugInfo('❌ فشل تسجيل Service Worker: ' + error.message);
-                            console.error('Service Worker error:', error);
                         });
                 } else {
                     this.showDebugInfo('⚠️ Service Worker غير مدعوم في هذا المتصفح');
@@ -507,7 +534,6 @@
                     this.showMessage('🎉 تم تثبيت التطبيق بنجاح!', 'success');
                 });
 
-                // إذا لم يظهر الحدث خلال 3 ثوان، أظهر الزر يدوياً
                 setTimeout(() => {
                     if (!this.deferredPrompt && !this.isAppInstalled) {
                         this.showDebugInfo('⏰ لم يظهر حدث التثبيت، عرض الزر يدوياً');
@@ -556,16 +582,6 @@
                     border: 2px solid white;
                 `;
 
-                installBtn.addEventListener('mouseenter', () => {
-                    installBtn.style.transform = 'translateY(-3px)';
-                    installBtn.style.boxShadow = '0 6px 25px rgba(67, 97, 238, 0.6)';
-                });
-
-                installBtn.addEventListener('mouseleave', () => {
-                    installBtn.style.transform = 'translateY(0)';
-                    installBtn.style.boxShadow = '0 4px 20px rgba(67, 97, 238, 0.4)';
-                });
-
                 installBtn.addEventListener('click', () => {
                     this.installApp();
                 });
@@ -573,7 +589,6 @@
                 document.body.appendChild(installBtn);
                 this.showDebugInfo('✅ زر التثبيت معروض');
 
-                // إخفاء تلقائي بعد 25 ثانية
                 setTimeout(() => {
                     this.hideInstallButton();
                 }, 25000);
@@ -649,7 +664,6 @@
             }
 
             showMessage(text, type) {
-                // إخفاء أي رسائل سابقة
                 this.hideMessage();
 
                 const message = document.createElement('div');
@@ -692,9 +706,6 @@
                 
                 this.showDebugInfo('🔍 فحص الحالة التفصيلي');
                 console.log('PWA Status Check:', status);
-                
-                // عرض النتائج في Eruda console
-                eruda.get('console').log('PWA Status:', status);
             }
 
             testManifest() {
@@ -714,7 +725,6 @@
             }
 
             setupFallbackInstall() {
-                // زر تثبيت يدوي إضافي يظهر بعد 8 ثواني
                 setTimeout(() => {
                     if (!this.isAppInstalled && !this.deferredPrompt) {
                         this.showDebugInfo('🔄 إظهار خيار التثبيت اليدوي');
@@ -726,13 +736,10 @@
 
         // بدء النظام عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 بدء نظام PWA مع Eruda...');
+            console.log('🎯 بدء نظام PWA...');
+            
+            // تعريف pwaInstaller في النطاق العام
             window.pwaInstaller = new PWAInstaller();
-
-            // إضافة رسالة ترحيب في Eruda
-            eruda.get('console').log('🎉 مرحباً! أدوات التصحيح مفعلة');
-            eruda.get('console').log('🔧 يمكنك الآن فحص Console والعناصر والشبكة');
-            eruda.get('console').log('📱 استخدم زر PWA للتحكم في التثبيت');
 
             // إدارة واجهة المستخدم الأساسية
             document.getElementById('searchIconTop').addEventListener('click', function() {
@@ -742,6 +749,12 @@
             document.getElementById('bottomSearchBtn').addEventListener('click', function(e) {
                 e.preventDefault();
                 document.getElementById('searchModal').style.display = 'block';
+            });
+
+            document.getElementById('searchButton').addEventListener('click', function() {
+                if (typeof performSearch === 'function') {
+                    performSearch();
+                }
             });
 
             document.querySelectorAll('.close').forEach(function(closeBtn) {
@@ -758,8 +771,30 @@
 
             document.getElementById('searchInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    performSearch();
+                    if (typeof performSearch === 'function') {
+                        performSearch();
+                    }
                 }
+            });
+
+            // إضافة أحداث للفئات
+            document.querySelectorAll('.category-filter').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    if (typeof filterApps === 'function') {
+                        filterApps(category);
+                    }
+                });
+            });
+
+            // إضافة أحداث لألسنة الأقسام
+            document.querySelectorAll('.section-tab').forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    if (typeof displaySpecialSection === 'function') {
+                        displaySpecialSection(section);
+                    }
+                });
             });
 
             document.querySelectorAll('.bottom-nav-item').forEach(function(item) {
@@ -772,22 +807,34 @@
                     
                     const target = this.getAttribute('href');
                     if (target === '#games') {
-                        filterApps('games');
+                        if (typeof filterApps === 'function') {
+                            filterApps('games');
+                        }
                     } else if (target === '#apps') {
-                        filterApps('all');
+                        if (typeof filterApps === 'function') {
+                            filterApps('all');
+                        }
                     } else if (target === '#search') {
                         document.getElementById('searchModal').style.display = 'block';
                     }
                 });
             });
 
-            console.log("✅ تم تحميل الصفحة بالكامل مع أدوات التصحيح");
+            console.log("✅ تم تحميل الصفحة بالكامل");
         });
 
         // جعل الدوال متاحة عالمياً
-        window.performSearch = performSearch;
-        window.filterApps = filterApps;
-        window.displaySpecialSection = displaySpecialSection;
+        window.performSearch = typeof performSearch !== 'undefined' ? performSearch : function() {
+            console.log('🔍 وظيفة البحث غير متوفرة بعد');
+        };
+
+        window.filterApps = typeof filterApps !== 'undefined' ? filterApps : function(category) {
+            console.log('🔍 تصفية التطبيقات حسب:', category);
+        };
+
+        window.displaySpecialSection = typeof displaySpecialSection !== 'undefined' ? displaySpecialSection : function(section) {
+            console.log('🔍 عرض القسم:', section);
+        };
     </script>
 </body>
 </html>
