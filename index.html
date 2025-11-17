@@ -551,5 +551,65 @@ document.head.appendChild(style);
             });
         });
     </script>
+    
+    
+    <script>
+// كود PWA مبسط للهاتف
+console.log('🚀 بدء تحميل PWA...');
+
+// 1. تسجيل Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker مسجل'))
+        .catch(err => console.log('❌ خطأ Service Worker:', err));
+}
+
+// 2. اكتشاف إمكانية التثبيت
+let installPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('✅ يمكن تثبيت التطبيق!');
+    e.preventDefault();
+    installPrompt = e;
+    showInstallButton();
+});
+
+// 3. عرض زر التثبيت
+function showInstallButton() {
+    const btn = document.createElement('button');
+    btn.innerHTML = '📲 تثبيت التطبيق';
+    btn.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        right: 15px;
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        z-index: 10000;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    `;
+    
+    btn.onclick = async () => {
+        if (!installPrompt) return;
+        installPrompt.prompt();
+        const result = await installPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+            console.log('✅ تم قبول التثبيت');
+            btn.remove();
+        }
+        installPrompt = null;
+    };
+    
+    document.body.appendChild(btn);
+}
+
+// 4. التحقق من التثبيت
+if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('✅ التطبيق مثبت بالفعل');
+}
+</script>
 </body>
 </html>
